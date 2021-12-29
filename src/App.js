@@ -14,13 +14,15 @@ function App() {
   const [page, setPage] = React.useState(1);
   let moviesList = [];
 
-  async function getMovies(url) {
-    const moviesResp = await fetch(url)
-    moviesList = await moviesResp.json()
-    setMovies(moviesList)
-  }
+  
 
-  useEffect( (getMovies, search) => {
+  useEffect( () => {
+    async function getMovies(url) {
+      const moviesResp = await fetch(url)
+      moviesList = await moviesResp.json()
+      setMovies(moviesList)
+    }
+
     if(searchTerm){
       const pagedURL = SEARCHAPI + searchTerm + '&page=' + page;
       getMovies(pagedURL);
