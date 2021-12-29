@@ -19,11 +19,7 @@ function App() {
   useEffect( () => {
     async function getMovies(url) {
       const moviesResp = await fetch(url)
-      moviesList = await moviesResp.json()
-      if(moviesList){
-        setMovies(moviesList)
-      }
-      
+      moviesList = await moviesResp.json()      
     }
 
     if(searchTerm){
@@ -37,7 +33,9 @@ function App() {
   }, [page])
 
   console.log(movies)
-
+  if(moviesList){
+    setMovies(moviesList)
+  }
   
 
   const handleOnChange = (e) => {
