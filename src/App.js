@@ -40,6 +40,11 @@ function App() {
   const handleOnChange = (e) => {
     setSearchTerm(e.target.value);
     if(searchTerm) {
+      async function getMovies(url) {
+        const moviesResp = await fetch(url)
+        moviesList = await moviesResp.json()
+        setMovies(moviesList)
+      }
       getMovies(SEARCHAPI + searchTerm);
     }
   }
