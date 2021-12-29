@@ -12,14 +12,14 @@ function App() {
   const [movies, setMovies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = React.useState(1);
-  let moviesList = [];
 
   
 
   useEffect( () => {
     async function getMovies(url) {
       const moviesResp = await fetch(url)
-      moviesList = await moviesResp.json()      
+      const moviesList = await moviesResp.json()
+      setMovies(moviesList)    
     }
 
     if(searchTerm){
@@ -32,18 +32,14 @@ function App() {
     
   }, [page])
 
-  console.log(movies)
-  if(moviesList){
-    setMovies(moviesList)
-  }
-  
+  console.log(movies)  
 
   const handleOnChange = (e) => {
     setSearchTerm(e.target.value);
     if(searchTerm) {
       async function getMovies(url) {
         const moviesResp = await fetch(url)
-        moviesList = await moviesResp.json()
+        const moviesList = await moviesResp.json()
         setMovies(moviesList)
       }
       getMovies(SEARCHAPI + searchTerm);
