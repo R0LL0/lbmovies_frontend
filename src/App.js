@@ -20,7 +20,10 @@ function App() {
     async function getMovies(url) {
       const moviesResp = await fetch(url)
       moviesList = await moviesResp.json()
-      setMovies(moviesList)
+      if(moviesList){
+        setMovies(moviesList)
+      }
+      
     }
 
     if(searchTerm){
