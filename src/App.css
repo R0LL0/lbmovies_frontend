@@ -111,3 +111,14 @@ header {
 .tag.red {
   color: red;
 }
+
+
+.movie-pagination {
+  background-color: #373b69;
+  display: flex;
+  align-items: center;
+  justify-content:center;
+  margin: 1rem ;
+  padding: 1rem;
+  color: #fff !important;
+}
