@@ -20,9 +20,10 @@ function App() {
     setMovies(moviesList)
   }
 
-  useEffect( () => {
+  useEffect( (getMovies, search) => {
     if(searchTerm){
-      getMovies(SEARCHAPI + searchTerm + '&page=' + page);
+      const pagedURL = SEARCHAPI + searchTerm + '&page=' + page;
+      getMovies(pagedURL);
     }else{
       getMovies(APIURL + page);
     }
