@@ -73,6 +73,14 @@ function App() {
       <div className="movie-pagination">
         <Pagination classes={{ ul: classes.ul }} count={movies.total_pages < 500 ? (movies.total_pages) : 500} page={page ?? 1} onChange={handleOnPageChange} variant="outlined" color="primary" />
       </div>
+      
+      <div className="movie-footer">
+        <span className="dd-footer">All Rights Reserved, LB Movies <script>document.write(new Date().getFullYear())</script>2021 © <br />
+          <span className="dd-footer dd-footer-secondary footer-link" >Designed &amp; Developed by <a target="_blank" href="https://github.com/R0LL0">R0LL0 </a></span>
+        </span>
+       
+      </div>
+
     </>
   );
 }

@@ -122,3 +122,27 @@ header {
   padding: 1rem;
   color: #fff !important;
 }
+
+.movie-footer {
+  display: flex;
+  align-items: center;
+  justify-content:center;
+  margin: 1rem ;
+  padding: 1rem;
+  color: #fff !important;
+}
+
+.dd-footer {
+  align-items: center;
+  justify-content:center;
+  font-size:12px; 
+}
+
+.dd-footer-secondary {
+  margin: 1rem;
+}
+
+.footer-link a {
+  color: #1976d2;
+  padding-left: 0px;
+}
