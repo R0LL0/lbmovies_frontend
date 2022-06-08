@@ -12,6 +12,8 @@ const setVoteClass = (vote_average) => {
     }
 }
 
+
+// Format Release Date
 function processReleaseDate(date) {
     
     var dateArray = date.split("-")
@@ -21,7 +23,6 @@ function processReleaseDate(date) {
     var newDate = day + "/" + month + "/" + year
 
     return newDate
-
 }
 
 
