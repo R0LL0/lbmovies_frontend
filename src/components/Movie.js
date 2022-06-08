@@ -12,6 +12,18 @@ const setVoteClass = (vote_average) => {
     }
 }
 
+function processReleaseDate(date) {
+    
+    var dateArray = date.split("-")
+    var day = dateArray[2]
+    var month = dateArray[1]
+    var year = dateArray[0]
+    var newDate = day + "/" + month + "/" + year
+
+    return newDate
+
+}
+
 
 const Movie = ({ title, poster_path, overview, release_date, vote_average}) => 
     <div className="movie">
@@ -21,7 +33,7 @@ const Movie = ({ title, poster_path, overview, release_date, vote_average}) =>
             <span className={`tag ${setVoteClass(vote_average)}`}>{vote_average}</span>
             
         </div>
-        <div className="movie-info">{release_date ? release_date.replace("-", "/") : ''}</div>
+        <div className="movie-info">{release_date ? processReleaseDate(release_date) : ''}</div>
         <div className="movie-over">
             <h2>Overview</h2>
             <p>{overview}</p>
