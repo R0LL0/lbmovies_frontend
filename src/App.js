@@ -135,6 +135,9 @@ function App() {
        
       </div>
 
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9577433211487496"
+     crossorigin="anonymous"></script>
+
     </>
   );
 }
