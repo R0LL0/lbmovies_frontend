@@ -82,7 +82,7 @@ function App() {
   const classes = useStyles();
   return (
     <>
-      <header className='img-logo'>
+      <header className='img-logo' onClick={() => window.location.href = 'https://lbmovies.netlify.app/'}>
         <img src={logo} width="100" alt="LB Movies" />
       </header>
       <header>
