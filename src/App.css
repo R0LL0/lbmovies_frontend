@@ -22,6 +22,8 @@ header {
   padding: 1rem;
   justify-content: center;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .nav-list-items {
@@ -47,7 +49,7 @@ header {
   font-family: inherit;
   font-size: 1.2rem;
   padding: 0.5rem 1.5rem;
-  width: 100%;
+  width: 500px;
 }
 
 .search:focus {
