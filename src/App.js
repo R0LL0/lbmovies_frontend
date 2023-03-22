@@ -86,7 +86,7 @@ function App() {
         <img src={logo} width="100" alt="LB Movies" />
       </header>
       <header className='d-flex justify-content-center'>
-            <input className="search searchField" type="search" placeholder="Search"  value={searchTerm} onChange={handleOnChange}" />
+            <input className="search w-100" type="search" placeholder="Search"  value={searchTerm} onChange={handleOnChange}" />
       </header>
       
       <div className='serie-container'>
