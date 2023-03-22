@@ -83,7 +83,7 @@ function App() {
   return (
     <>
       <header className='img-logo' onClick={() => window.location.href = 'https://lbmovies.netlify.app/'}>
-        <img src={logo} width="100" alt="LB Movies" />
+        <img src={logo} width="200" alt="LB Movies" />
       </header>
       <header className="searchFieldHeader">
             <input className="search" type="search" placeholder='Search' value={searchTerm} onChange={handleOnChange} />
