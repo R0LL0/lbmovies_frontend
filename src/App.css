@@ -52,6 +52,19 @@ header {
   width: 500px;
 }
 
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #FFFFFF;
+  opacity: 1; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #FFFFFF;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #FFFFFF;
+}
+
 .search:focus {
   outline: none;
 }
