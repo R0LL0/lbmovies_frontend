@@ -85,8 +85,8 @@ function App() {
       <header className='img-logo' onClick={() => window.location.href = 'https://lbmovies.netlify.app/'}>
         <img src={logo} width="100" alt="LB Movies" />
       </header>
-      <header className='d-flex justify-content-center'>
-            <input className="search" type="search" placeholder="Search"  value={searchTerm} onChange={handleOnChange}" />
+      <header>
+            <input className="search" type="search" placeholder='Search' value={searchTerm} onChange={handleOnChange} />
       </header>
       
       <div className='serie-container'>
