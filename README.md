@@ -1,72 +1,134 @@
-[![See On Netlify](data:image/png;base64,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)](https://lbmovies.netlify.app/)
+# LB Movies - Modern Movie & Series Discovery Platform
 
-# Getting Started with Create React App
+A modern, responsive web application for discovering and exploring movies and TV series, built with React and powered by The Movie Database (TMDB) API.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 🎬 Features
 
-## Available Scripts
+- **Movie & Series Discovery**: Browse popular movies and TV series
+- **Advanced Search**: Search for movies and series with real-time results
+- **Detailed Information**: View comprehensive details including cast, trailers, reviews, and watch providers
+- **Social Features**:
+  - Comment on movies and series
+  - Follow other users
+  - Activity feed to see what friends are watching
+  - Similar users discovery
+- **User Profiles**: 
+  - Save favorites and watchlist
+  - View followers and following
+  - Edit profile information
+- **Secure Authentication**: User signup/signin with email confirmation via Supabase
+- **Responsive Design**: Beautiful, modern UI that works on all devices
 
-In the project directory, you can run:
+## 🚀 Tech Stack
 
-### `npm start`
+- **Frontend**: React 18, React Router
+- **UI Components**: Material-UI (MUI)
+- **Backend**: Supabase (Authentication & Database)
+- **API**: The Movie Database (TMDB) via Netlify Functions
+- **Deployment**: Netlify
+- **Styling**: Modern CSS with glassmorphism effects
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📦 Installation
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. Clone the repository:
+```bash
+git clone https://github.com/R0LL0/lbmovies_frontend.git
+cd lbmovies_frontend
+```
 
-### `npm test`
+2. Install dependencies:
+```bash
+npm install --legacy-peer-deps
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. Set up environment variables:
+Create a `.env` file in the root directory:
+```env
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-### `npm run build`
+4. Start the development server:
+```bash
+npm start
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🔧 Configuration
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Supabase Setup
+1. Create a Supabase project at [supabase.com](https://supabase.com)
+2. Run the SQL schema to create necessary tables (see Supabase dashboard)
+3. Configure authentication settings
+4. Add your Supabase credentials to `.env`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Netlify Deployment
+1. Connect your GitHub repository to Netlify
+2. Add environment variables in Netlify:
+   - `TMDB_API_KEY`: Your TMDB API key
+   - `REACT_APP_SUPABASE_URL`: Your Supabase URL
+   - `REACT_APP_SUPABASE_ANON_KEY`: Your Supabase anon key
+3. Deploy!
 
-### `npm run eject`
+## 🎯 Key Features Explained
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Secure API Calls
+All TMDB API calls go through Netlify Functions, keeping your API key secure on the server side. No API keys are exposed in the client-side code.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Social Interactions
+- **Comments**: Users can comment on movies and series
+- **Following**: Follow other users to see their activity
+- **Activity Feed**: Real-time feed of activities from users you follow
+- **Similar Users**: Discover users with similar movie preferences
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### User Data
+- Favorites and watchlist are stored in Supabase
+- User profiles with customizable information
+- Social connections and activity tracking
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 📱 Pages
 
-## Learn More
+- **Home**: Browse popular movies and series
+- **Movie Detail**: Comprehensive movie information
+- **Series Detail**: Comprehensive series information
+- **Profile**: User profile with favorites, watchlist, and social features
+- **Activity Feed**: See what your friends are watching
+- **Login/Signup**: User authentication
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔒 Security
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- API keys stored securely in environment variables
+- All API calls proxied through Netlify Functions
+- Row Level Security (RLS) enabled on all database tables
+- Secure authentication with Supabase
 
-### Code Splitting
+## 🛠️ Development
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Available Scripts
 
-### Analyzing the Bundle Size
+- `npm start`: Start development server
+- `npm run build`: Build for production
+- `npm test`: Run tests
+- `npm run eject`: Eject from Create React App
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Project Structure
 
-### Making a Progressive Web App
+```
+src/
+├── components/      # Reusable components
+├── pages/          # Page components
+├── services/       # API and service functions
+├── utils/          # Utility functions
+└── config/         # Configuration files
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## 📄 License
 
-### Advanced Configuration
+All Rights Reserved, LB Movies © 2024
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Designed & Developed by [R0LL0](https://github.com/R0LL0)
 
-### Deployment
+## 🙏 Acknowledgments
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- [The Movie Database (TMDB)](https://www.themoviedb.org/) for the API
+- [Supabase](https://supabase.com/) for backend services
+- [Netlify](https://netlify.com/) for hosting and serverless functions
