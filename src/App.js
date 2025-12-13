@@ -1,141 +1,364 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Movie from './components/Movie';
 import Serie from './components/Serie';
+import Navigation from './components/Navigation';
+import MovieDetail from './pages/MovieDetail';
+import SeriesDetail from './pages/SeriesDetail';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
 import Pagination from '@mui/material/Pagination';
-import {Link} from "react-router-dom";
+import { CircularProgress, Alert, Typography } from '@mui/material';
 import './App.css';
-import { makeStyles } from '@mui/styles';
-import logo from "./images/2.png";
 
 const APIURLMOVIES = "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=5003d23dedc1001d745759e4c7ffe979&page=";
 const APIURLSERIES = "https://api.themoviedb.org/3/discover/tv?sort_by=popularity.desc&api_key=5003d23dedc1001d745759e4c7ffe979&page=";
 const SEARCHAPIMOVIES = "https://api.themoviedb.org/3/search/movie?&api_key=5003d23dedc1001d745759e4c7ffe979&query=";
 const SEARCHAPISERIES = "https://api.themoviedb.org/3/search/tv?&api_key=5003d23dedc1001d745759e4c7ffe979&query=";
 
+// Custom hook for debouncing
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 function App() {
-  const [movies, setMovies] = useState([]);
-  const [series, setSeries] = useState([]);
+  const [movies, setMovies] = useState(null);
+  const [series, setSeries] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [pageMovies, setPageMovies] = React.useState(1);
-  const [pageSeries, setPageSeries] = React.useState(1);
+  const [activeSection, setActiveSection] = useState('all');
+  const [pageMovies, setPageMovies] = useState(1);
+  const [pageSeries, setPageSeries] = useState(1);
+  const [loadingMovies, setLoadingMovies] = useState(true);
+  const [loadingSeries, setLoadingSeries] = useState(true);
+  const [errorMovies, setErrorMovies] = useState(null);
+  const [errorSeries, setErrorSeries] = useState(null);
 
-  
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  useEffect( () => {
-    async function getMovies(url_movies, url_series) {
-      const moviesResp = await fetch(url_movies)
-      const moviesList = await moviesResp.json()
-      setMovies(moviesList) 
+  // Reset to page 1 when search term changes
+  useEffect(() => {
+    setPageMovies(1);
+    setPageSeries(1);
+  }, [debouncedSearchTerm]);
+
+  const fetchMovies = useCallback(async () => {
+    setLoadingMovies(true);
+    setErrorMovies(null);
+    try {
+      const url = debouncedSearchTerm
+        ? `${SEARCHAPIMOVIES}${encodeURIComponent(debouncedSearchTerm)}&page=${pageMovies}`
+        : `${APIURLMOVIES}${pageMovies}`;
       
-      const seriesResp = await fetch(url_series)
-      const seriesList = await seriesResp.json()
-      setSeries(seriesList) 
-    }
-
-    if(searchTerm){
-      const pagedURLMOVIES = SEARCHAPIMOVIES + searchTerm + '&page=' + pageMovies;
-      const pagedURLSERIES = SEARCHAPISERIES + searchTerm + '&page=' + pageSeries;
-      getMovies(pagedURLMOVIES, pagedURLSERIES);
-    }else{
-      getMovies(APIURLMOVIES + pageMovies, APIURLSERIES + pageSeries);
-    }
-    
-    
-  }, [pageMovies, pageSeries])
-
-
-  const handleOnChange = (e) => {
-    setSearchTerm(e.target.value);
-    if(searchTerm) {
-      async function getMovies(url_movies, url_series) {
-        const moviesResp = await fetch(url_movies)
-        const moviesList = await moviesResp.json()
-        setMovies(moviesList) 
-        
-        const seriesResp = await fetch(url_series)
-        const seriesList = await seriesResp.json()
-        setSeries(seriesList) 
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      const pagedURLMOVIES = SEARCHAPIMOVIES + searchTerm + '&page=' + pageMovies;
-      const pagedURLSERIES = SEARCHAPISERIES + searchTerm + '&page=' + pageSeries;
-      getMovies(pagedURLMOVIES, pagedURLSERIES);
+      const data = await response.json();
+      setMovies(data);
+    } catch (err) {
+      setErrorMovies(err.message);
+      console.error('Error fetching movies:', err);
+    } finally {
+      setLoadingMovies(false);
     }
-  }
-  
+  }, [debouncedSearchTerm, pageMovies]);
+
+  const fetchSeries = useCallback(async () => {
+    setLoadingSeries(true);
+    setErrorSeries(null);
+    try {
+      const url = debouncedSearchTerm
+        ? `${SEARCHAPISERIES}${encodeURIComponent(debouncedSearchTerm)}&page=${pageSeries}`
+        : `${APIURLSERIES}${pageSeries}`;
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setSeries(data);
+    } catch (err) {
+      setErrorSeries(err.message);
+      console.error('Error fetching series:', err);
+    } finally {
+      setLoadingSeries(false);
+    }
+  }, [debouncedSearchTerm, pageSeries]);
+
+  useEffect(() => {
+    fetchMovies();
+  }, [fetchMovies]);
+
+  useEffect(() => {
+    fetchSeries();
+  }, [fetchSeries]);
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+  };
+
+  const handleSectionChange = (section) => {
+    setActiveSection(section);
+  };
+
   const handleOnPageChangeMovies = (event, value) => {
     setPageMovies(value);
-  }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleOnPageChangeSeries = (event, value) => {
     setPageSeries(value);
-  }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  const useStyles = makeStyles(() => ({
+  const currentYear = new Date().getFullYear();
+
+  const paginationStyles = useMemo(() => ({
     ul: {
       "& .MuiPaginationItem-root": {
-        color: "#fff"
+        color: "var(--text-primary)",
+        fontSize: "1rem",
+        fontWeight: 500,
+        borderColor: "rgba(255, 255, 255, 0.2)",
+        "&:hover": {
+          backgroundColor: "rgba(255, 87, 34, 0.2)",
+          borderColor: "rgba(255, 87, 34, 0.4)",
+          color: "var(--accent-color)",
+        },
+        "&.Mui-selected": {
+          backgroundColor: "var(--gradient-primary)",
+          borderColor: "var(--accent-color)",
+          color: "#fff",
+          fontWeight: 700,
+          boxShadow: "0 4px 12px rgba(255, 87, 34, 0.4)",
+          "&:hover": {
+            backgroundColor: "var(--gradient-primary)",
+            opacity: 0.9,
+          }
+        },
+        "&.Mui-disabled": {
+          opacity: 0.3,
+        }
       }
     }
-  }));
+  }), []);
 
-  const classes = useStyles();
+  const shouldShowMovies = activeSection === 'all' || activeSection === 'movies';
+  const shouldShowSeries = activeSection === 'all' || activeSection === 'series';
+
   return (
-    <>
-      <header className='img-logo' onClick={() => window.location.href = 'https://lbmovies.netlify.app/'}>
-        <img src={logo} width="200" alt="LB Movies" />
-      </header>
-      <header className="searchFieldHeader">
-            <input className="search" type="search" placeholder='Search' value={searchTerm} onChange={handleOnChange} />
-      </header>
-      
-      <div className='serie-container'>
-        <h1>Most Popular Movies</h1> 
-      </div>
+    <Routes>
+      <Route 
+        path="/movie/:id" 
+        element={<MovieDetail />} 
+      />
+      <Route 
+        path="/series/:id" 
+        element={<SeriesDetail />} 
+      />
+      <Route 
+        path="/login" 
+        element={<Login />} 
+      />
+      <Route 
+        path="/profile" 
+        element={<Profile />} 
+      />
+      <Route 
+        path="/" 
+        element={
+          <div className="app-container">
+            <Navigation 
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+              onSectionChange={handleSectionChange}
+              activeSection={activeSection}
+            />
 
-      {/* <div className="movie-pagination">
-        <Pagination classes={{ ul: classes.ul }} count={movies.total_pages < 500 ? (movies.total_pages) : 500} page={page ?? 1} onChange={handleOnPageChange} variant="outlined" color="primary" />
-      </div> */}
+            <main className="main-content">
+        {/* Movies Section */}
+        {shouldShowMovies && (
+          <section id="movies-section" className="content-section" aria-labelledby="movies-heading">
+          <div className="section-header">
+            <Typography variant="h2" component="h1" id="movies-heading" className="section-title">
+              {debouncedSearchTerm ? (
+                <>🔍 Search Results for "{debouncedSearchTerm}"</>
+              ) : (
+                <>🎥 Most Popular Movies</>
+              )}
+            </Typography>
+            {movies && !loadingMovies && (
+              <Typography variant="body2" className="section-subtitle">
+                {movies.total_results} {movies.total_results === 1 ? 'result' : 'results'} found
+              </Typography>
+            )}
+          </div>
 
-      <div className='movie-container'>   
-        {movies.results?.length > 0 && movies.results.map((movie) => (
-          <Movie key={movie.id} {...movie}/>
-        ))}
-      </div>
+          {errorMovies && (
+            <Alert severity="error" className="error-alert">
+              Failed to load movies: {errorMovies}
+            </Alert>
+          )}
 
-      <div className="movie-pagination">
-        <Pagination classes={{ ul: classes.ul }} count={movies.total_pages < 500 ? (movies.total_pages) : 500} page={pageMovies ?? 1} onChange={handleOnPageChangeMovies} variant="outlined" color="primary" />
-      </div>
+          {loadingMovies ? (
+            <>
+              <div className="skeleton-grid">
+                {[...Array(6)].map((_, index) => (
+                  <div key={index} className="skeleton-card">
+                    <div className="skeleton-image"></div>
+                    <div className="skeleton-content">
+                      <div className="skeleton-line"></div>
+                      <div className="skeleton-line short"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="movie-container">
+                {movies?.results?.length > 0 ? (
+                  movies.results.map((movie) => (
+                    <Movie key={movie.id} {...movie} />
+                  ))
+                ) : (
+                  !errorMovies && (
+                    <div className="empty-state">
+                      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎬</div>
+                      <Typography variant="h5">No movies found</Typography>
+                      <Typography variant="body2">Try adjusting your search terms or browse popular movies</Typography>
+                    </div>
+                  )
+                )}
+              </div>
 
-      
-      <div className='movie-container'>
-        <h1>Most Popular Series</h1> 
-      </div>
+              {movies?.total_pages > 1 && (
+                <div className="movie-pagination">
+                  <Pagination 
+                    classes={paginationStyles} 
+                    count={Math.min(movies.total_pages, 500)} 
+                    page={pageMovies} 
+                    onChange={handleOnPageChangeMovies} 
+                    variant="outlined" 
+                    color="primary"
+                    size="large"
+                  />
+                </div>
+              )}
+            </>
+          )}
+          </section>
+        )}
 
-      {/* <div className="serie-pagination">
-        <Pagination classes={{ ul: classes.ul }} count={series.total_pages < 500 ? (series.total_pages) : 500} page={page ?? 1} onChange={handleOnPageChange} variant="outlined" color="primary" />
-      </div> */}
+        {/* Series Section */}
+        {shouldShowSeries && (
+          <section id="series-section" className="content-section" aria-labelledby="series-heading">
+          <div className="section-header">
+            <Typography variant="h2" component="h1" id="series-heading" className="section-title">
+              {debouncedSearchTerm ? (
+                <>🔍 Search Results for "{debouncedSearchTerm}"</>
+              ) : (
+                <>📺 Most Popular Series</>
+              )}
+            </Typography>
+            {series && !loadingSeries && (
+              <Typography variant="body2" className="section-subtitle">
+                {series.total_results} {series.total_results === 1 ? 'result' : 'results'} found
+              </Typography>
+            )}
+          </div>
 
-      <div className='serie-container'>  
-        {series.results?.length > 0 && series.results.map((serie) => (
-          <Serie key={serie.id} {...serie}/>
-        ))}
-      </div>
+          {errorSeries && (
+            <Alert severity="error" className="error-alert">
+              Failed to load series: {errorSeries}
+            </Alert>
+          )}
 
-      <div className="serie-pagination">
-        <Pagination classes={{ ul: classes.ul }} count={series.total_pages < 500 ? (series.total_pages) : 500} page={pageSeries ?? 1} onChange={handleOnPageChangeSeries} variant="outlined" color="primary" />
-      </div>
-      
-      <div className="movie-footer">
-        <span className="dd-footer">All Rights Reserved, LB Movies <script>document.write(new Date().getFullYear())</script>2021 © <br />
-          <span className="dd-footer dd-footer-secondary footer-link" >Designed &amp; Developed by <a target="_blank" href="https://github.com/R0LL0">R0LL0 </a></span>
-        </span>
-       
-      </div>
+          {loadingSeries ? (
+            <>
+              <div className="skeleton-grid">
+                {[...Array(6)].map((_, index) => (
+                  <div key={index} className="skeleton-card">
+                    <div className="skeleton-image"></div>
+                    <div className="skeleton-content">
+                      <div className="skeleton-line"></div>
+                      <div className="skeleton-line short"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="serie-container">
+                {series?.results?.length > 0 ? (
+                  series.results.map((serie) => (
+                    <Serie key={serie.id} {...serie} />
+                  ))
+                ) : (
+                  !errorSeries && (
+                    <div className="empty-state">
+                      <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>📺</div>
+                      <Typography variant="h5">No series found</Typography>
+                      <Typography variant="body2">Try adjusting your search terms or browse popular series</Typography>
+                    </div>
+                  )
+                )}
+              </div>
 
+              {series?.total_pages > 1 && (
+                <div className="serie-pagination">
+                  <Pagination 
+                    classes={paginationStyles} 
+                    count={Math.min(series.total_pages, 500)} 
+                    page={pageSeries} 
+                    onChange={handleOnPageChangeSeries} 
+                    variant="outlined" 
+                    color="primary"
+                    size="large"
+                  />
+                </div>
+              )}
+            </>
+          )}
+          </section>
+        )}
+      </main>
 
-
-    </>
+      <footer className="movie-footer">
+        <div className="footer-content">
+          <Typography variant="body2" className="dd-footer">
+            All Rights Reserved, LB Movies {currentYear} ©
+          </Typography>
+          <Typography variant="body2" className="dd-footer dd-footer-secondary footer-link">
+            Designed &amp; Developed by{' '}
+            <a 
+              target="_blank" 
+              href="https://github.com/R0LL0" 
+              rel="noopener noreferrer"
+              aria-label="Visit R0LL0's GitHub profile"
+            >
+              R0LL0
+            </a>
+          </Typography>
+        </div>
+      </footer>
+          </div>
+        }
+      />
+    </Routes>
   );
 }
 
