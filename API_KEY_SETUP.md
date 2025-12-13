@@ -38,6 +38,7 @@ After adding the environment variable, you need to trigger a new deployment:
 ## How It Works
 
 ### Before (Insecure)
+
 ```
 Frontend → Direct TMDB API call
 URL: https://api.themoviedb.org/3/discover/movie?api_key=5003d23dedc1001d745759e4c7ffe979
@@ -45,6 +46,7 @@ URL: https://api.themoviedb.org/3/discover/movie?api_key=5003d23dedc1001d745759e
 ```
 
 ### After (Secure)
+
 ```
 Frontend → Netlify Function → TMDB API
 URL: /.netlify/functions/tmdb-proxy?endpoint=discover/movie&sort_by=popularity.desc
@@ -64,16 +66,19 @@ URL: /.netlify/functions/tmdb-proxy?endpoint=discover/movie&sort_by=popularity.d
 To test locally with Netlify Functions:
 
 1. Install Netlify CLI:
+
    ```bash
    npm install -g netlify-cli
    ```
 
 2. Create `.env` file in project root:
+
    ```
    TMDB_API_KEY=5003d23dedc1001d745759e4c7ffe979
    ```
 
 3. Run Netlify Dev:
+
    ```bash
    netlify dev
    ```
@@ -83,19 +88,23 @@ To test locally with Netlify Functions:
 ## Troubleshooting
 
 ### Function returns 500 error
+
 - Check that `TMDB_API_KEY` is set in Netlify environment variables
 - Verify the API key is correct
 - Check Netlify function logs in the dashboard
 
 ### Function returns 400 error
+
 - Check that the `endpoint` parameter is being passed correctly
 - Verify the endpoint path is valid (e.g., `discover/movie`, not `/discover/movie`)
 
 ### CORS errors
+
 - The function already includes CORS headers
 - If you see CORS errors, check the function logs
 
 ### API calls not working
+
 - Make sure you've redeployed after adding the environment variable
 - Check browser console for errors
 - Verify the function is accessible at `/.netlify/functions/tmdb-proxy`
@@ -114,4 +123,3 @@ To test locally with Netlify Functions:
 2. **API Key Rotation**: Rotate your API key periodically
 3. **Monitoring**: Set up alerts for unusual API usage
 4. **Caching**: Consider adding caching to reduce API calls
-

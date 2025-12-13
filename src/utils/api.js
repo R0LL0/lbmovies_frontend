@@ -3,7 +3,7 @@
  * This keeps the API key secure on the server side
  */
 
-const API_BASE = '/.netlify/functions/tmdb-proxy';
+const API_BASE = "/.netlify/functions/tmdb-proxy";
 
 /**
  * Build query string from parameters
@@ -28,17 +28,17 @@ const callTMDB = async (endpoint, params = {}) => {
   });
 
   const url = `${API_BASE}?${queryString}`;
-  
+
   try {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`);
     }
-    
+
     return await response.json();
   } catch (error) {
-    console.error('Error calling TMDB API:', error);
+    console.error("Error calling TMDB API:", error);
     throw error;
   }
 };
@@ -46,8 +46,8 @@ const callTMDB = async (endpoint, params = {}) => {
 /**
  * Discover movies
  */
-export const discoverMovies = async (page = 1, sortBy = 'popularity.desc') => {
-  return callTMDB('discover/movie', {
+export const discoverMovies = async (page = 1, sortBy = "popularity.desc") => {
+  return callTMDB("discover/movie", {
     sort_by: sortBy,
     page: page.toString(),
   });
@@ -56,8 +56,8 @@ export const discoverMovies = async (page = 1, sortBy = 'popularity.desc') => {
 /**
  * Discover TV series
  */
-export const discoverSeries = async (page = 1, sortBy = 'popularity.desc') => {
-  return callTMDB('discover/tv', {
+export const discoverSeries = async (page = 1, sortBy = "popularity.desc") => {
+  return callTMDB("discover/tv", {
     sort_by: sortBy,
     page: page.toString(),
   });
@@ -67,7 +67,7 @@ export const discoverSeries = async (page = 1, sortBy = 'popularity.desc') => {
  * Search movies
  */
 export const searchMovies = async (query, page = 1) => {
-  return callTMDB('search/movie', {
+  return callTMDB("search/movie", {
     query: encodeURIComponent(query),
     page: page.toString(),
   });
@@ -77,7 +77,7 @@ export const searchMovies = async (query, page = 1) => {
  * Search TV series
  */
 export const searchSeries = async (query, page = 1) => {
-  return callTMDB('search/tv', {
+  return callTMDB("search/tv", {
     query: encodeURIComponent(query),
     page: page.toString(),
   });
@@ -86,30 +86,29 @@ export const searchSeries = async (query, page = 1) => {
 /**
  * Get movie details
  */
-export const getMovieDetails = async (movieId, appendToResponse = '') => {
+export const getMovieDetails = async (movieId, appendToResponse = "") => {
   const params = {
-    language: 'en-US',
+    language: "en-US",
   };
-  
+
   if (appendToResponse) {
     params.append_to_response = appendToResponse;
   }
-  
+
   return callTMDB(`movie/${movieId}`, params);
 };
 
 /**
  * Get TV series details
  */
-export const getSeriesDetails = async (seriesId, appendToResponse = '') => {
+export const getSeriesDetails = async (seriesId, appendToResponse = "") => {
   const params = {
-    language: 'en-US',
+    language: "en-US",
   };
-  
+
   if (appendToResponse) {
     params.append_to_response = appendToResponse;
   }
-  
+
   return callTMDB(`tv/${seriesId}`, params);
 };
-

@@ -138,6 +138,7 @@ export const addComment = async (userId, movieId, movieType, content) => {
 // Get comments for a movie/series
 export const getComments = async (movieId, movieType) => {
   try {
+    // Try to get comments with profiles join
     const { data, error } = await supabase
       .from("comments")
       .select("*, profiles(*)")
@@ -146,6 +147,57 @@ export const getComments = async (movieId, movieType) => {
       .order("created_at", { ascending: false });
 
     if (error) {
+      // If relationship error, try fetching comments without profiles
+      if (
+        error.code === "PGRST200" ||
+        error.message.includes("relationship") ||
+        error.message.includes("foreign key")
+      ) {
+        console.warn("Profiles relationship not found, fetching comments without profiles");
+        const { data: commentsData, error: commentsError } = await supabase
+          .from("comments")
+          .select("*")
+          .eq("movie_id", movieId)
+          .eq("movie_type", movieType)
+          .order("created_at", { ascending: false });
+
+        if (commentsError) {
+          if (
+            commentsError.code === "PGRST116" ||
+            commentsError.message.includes("406") ||
+            commentsError.message.includes("relation")
+          ) {
+            return { data: [], error: null };
+          }
+          throw commentsError;
+        }
+
+        // Fetch profiles separately and merge
+        if (commentsData && commentsData.length > 0) {
+          const userIds = [...new Set(commentsData.map(c => c.user_id))];
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("*")
+            .in("id", userIds);
+
+          const profilesMap = {};
+          if (profilesData) {
+            profilesData.forEach(p => {
+              profilesMap[p.id] = p;
+            });
+          }
+
+          const commentsWithProfiles = commentsData.map(comment => ({
+            ...comment,
+            profiles: profilesMap[comment.user_id] || null,
+          }));
+
+          return { data: commentsWithProfiles, error: null };
+        }
+
+        return { data: [], error: null };
+      }
+
       if (
         error.code === "PGRST116" ||
         error.message.includes("406") ||

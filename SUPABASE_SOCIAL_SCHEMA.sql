@@ -8,7 +8,10 @@ CREATE TABLE IF NOT EXISTS user_follows (
   following_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(follower_id, following_id),
-  CHECK (follower_id != following_id)
+  CHECK (follower_id != following_id),
+  -- Add foreign keys to profiles for PostgREST relationships
+  CONSTRAINT user_follows_follower_id_profiles_fkey FOREIGN KEY (follower_id) REFERENCES profiles(id) ON DELETE CASCADE,
+  CONSTRAINT user_follows_following_id_profiles_fkey FOREIGN KEY (following_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- Comments Table (for movies/series)
@@ -19,7 +22,9 @@ CREATE TABLE IF NOT EXISTS comments (
   movie_type TEXT NOT NULL CHECK (movie_type IN ('movie', 'series')),
   content TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  -- Add foreign key to profiles for PostgREST relationship
+  CONSTRAINT comments_user_id_profiles_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- User Activity Feed
@@ -31,7 +36,10 @@ CREATE TABLE IF NOT EXISTS user_activities (
   movie_type TEXT CHECK (movie_type IN ('movie', 'series')),
   target_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   metadata JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  -- Add foreign keys to profiles for PostgREST relationships
+  CONSTRAINT user_activities_user_id_profiles_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE,
+  CONSTRAINT user_activities_target_user_id_profiles_fkey FOREIGN KEY (target_user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- User Recommendations (based on similar users)
@@ -43,7 +51,9 @@ CREATE TABLE IF NOT EXISTS user_recommendations (
   score DECIMAL(5,2),
   reason TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(user_id, movie_id, movie_type)
+  UNIQUE(user_id, movie_id, movie_type),
+  -- Add foreign key to profiles for PostgREST relationship
+  CONSTRAINT user_recommendations_user_id_profiles_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE CASCADE
 );
 
 -- Enable Row Level Security
