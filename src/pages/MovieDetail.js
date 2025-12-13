@@ -17,9 +17,9 @@ import {
   addToWatchlist,
   removeFromWatchlist,
 } from "../utils/favorites";
+import { getMovieDetails } from "../utils/api";
 import "./DetailPage.css";
 
-const API_KEY = "5003d23dedc1001d745759e4c7ffe979";
 const IMG_BASE_URL = "https://image.tmdb.org/t/p/w1280";
 const IMG_POSTER_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -55,15 +55,10 @@ const MovieDetail = () => {
       setError(null);
       try {
         // Fetch movie details with all additional data
-        const movieResponse = await fetch(
-          `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits,videos,similar,watch/providers,images,reviews`
+        const movieData = await getMovieDetails(
+          id,
+          "credits,videos,similar,watch/providers,images,reviews"
         );
-
-        if (!movieResponse.ok) {
-          throw new Error("Failed to fetch movie details");
-        }
-
-        const movieData = await movieResponse.json();
         setMovie(movieData);
         setCast(movieData.credits?.cast?.slice(0, 12) || []);
         setVideos(

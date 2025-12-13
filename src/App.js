@@ -11,16 +11,8 @@ import ActivityFeed from "./pages/ActivityFeed";
 import EmailConfirmation from "./components/EmailConfirmation";
 import Pagination from "@mui/material/Pagination";
 import { CircularProgress, Alert, Typography } from "@mui/material";
+import { discoverMovies, discoverSeries, searchMovies, searchSeries } from "./utils/api";
 import "./App.css";
-
-const APIURLMOVIES =
-  "https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=5003d23dedc1001d745759e4c7ffe979&page=";
-const APIURLSERIES =
-  "https://api.themoviedb.org/3/discover/tv?sort_by=popularity.desc&api_key=5003d23dedc1001d745759e4c7ffe979&page=";
-const SEARCHAPIMOVIES =
-  "https://api.themoviedb.org/3/search/movie?&api_key=5003d23dedc1001d745759e4c7ffe979&query=";
-const SEARCHAPISERIES =
-  "https://api.themoviedb.org/3/search/tv?&api_key=5003d23dedc1001d745759e4c7ffe979&query=";
 
 // Custom hook for debouncing
 function useDebounce(value, delay) {
@@ -63,17 +55,9 @@ function App() {
     setLoadingMovies(true);
     setErrorMovies(null);
     try {
-      const url = debouncedSearchTerm
-        ? `${SEARCHAPIMOVIES}${encodeURIComponent(
-            debouncedSearchTerm
-          )}&page=${pageMovies}`
-        : `${APIURLMOVIES}${pageMovies}`;
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = debouncedSearchTerm
+        ? await searchMovies(debouncedSearchTerm, pageMovies)
+        : await discoverMovies(pageMovies);
       setMovies(data);
     } catch (err) {
       setErrorMovies(err.message);
