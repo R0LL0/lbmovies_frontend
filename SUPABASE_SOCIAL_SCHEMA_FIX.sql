@@ -1,5 +1,14 @@
 -- Fix for Comments to Profiles relationship
 -- Run this SQL in Supabase SQL Editor after running SUPABASE_SOCIAL_SCHEMA.sql
+-- This script is idempotent - safe to run multiple times
+
+-- Drop existing foreign key constraints if they exist (to avoid errors on re-run)
+ALTER TABLE comments DROP CONSTRAINT IF EXISTS comments_user_id_profiles_fkey;
+ALTER TABLE user_activities DROP CONSTRAINT IF EXISTS user_activities_user_id_profiles_fkey;
+ALTER TABLE user_activities DROP CONSTRAINT IF EXISTS user_activities_target_user_id_profiles_fkey;
+ALTER TABLE user_follows DROP CONSTRAINT IF EXISTS user_follows_follower_id_profiles_fkey;
+ALTER TABLE user_follows DROP CONSTRAINT IF EXISTS user_follows_following_id_profiles_fkey;
+ALTER TABLE user_recommendations DROP CONSTRAINT IF EXISTS user_recommendations_user_id_profiles_fkey;
 
 -- Add foreign key relationship from comments.user_id to profiles.id
 -- This allows Supabase PostgREST to automatically join profiles when querying comments

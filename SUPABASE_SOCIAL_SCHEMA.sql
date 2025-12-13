@@ -63,36 +63,44 @@ ALTER TABLE user_activities ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_recommendations ENABLE ROW LEVEL SECURITY;
 
 -- Policies for user_follows
+DROP POLICY IF EXISTS "Users can view all follows" ON user_follows;
 CREATE POLICY "Users can view all follows"
   ON user_follows FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Users can create own follows" ON user_follows;
 CREATE POLICY "Users can create own follows"
   ON user_follows FOR INSERT
   WITH CHECK (auth.uid() = follower_id);
 
+DROP POLICY IF EXISTS "Users can delete own follows" ON user_follows;
 CREATE POLICY "Users can delete own follows"
   ON user_follows FOR DELETE
   USING (auth.uid() = follower_id OR auth.uid() = following_id);
 
 -- Policies for comments
+DROP POLICY IF EXISTS "Users can view all comments" ON comments;
 CREATE POLICY "Users can view all comments"
   ON comments FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Users can create own comments" ON comments;
 CREATE POLICY "Users can create own comments"
   ON comments FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own comments" ON comments;
 CREATE POLICY "Users can update own comments"
   ON comments FOR UPDATE
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own comments" ON comments;
 CREATE POLICY "Users can delete own comments"
   ON comments FOR DELETE
   USING (auth.uid() = user_id);
 
 -- Policies for user_activities
+DROP POLICY IF EXISTS "Users can view activities of users they follow" ON user_activities;
 CREATE POLICY "Users can view activities of users they follow"
   ON user_activities FOR SELECT
   USING (
@@ -103,15 +111,18 @@ CREATE POLICY "Users can view activities of users they follow"
     )
   );
 
+DROP POLICY IF EXISTS "Users can create own activities" ON user_activities;
 CREATE POLICY "Users can create own activities"
   ON user_activities FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Policies for user_recommendations
+DROP POLICY IF EXISTS "Users can view own recommendations" ON user_recommendations;
 CREATE POLICY "Users can view own recommendations"
   ON user_recommendations FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create own recommendations" ON user_recommendations;
 CREATE POLICY "Users can create own recommendations"
   ON user_recommendations FOR INSERT
   WITH CHECK (auth.uid() = user_id);
