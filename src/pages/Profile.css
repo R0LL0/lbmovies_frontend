@@ -5,6 +5,7 @@
   margin: 0 auto;
   background: radial-gradient(ellipse at top, #1a1f2e 0%, #0a0e1a 50%, #050810 100%);
   color: var(--text-primary, #ffffff);
+  padding-top: 1rem;
 }
 
 .profile-loading {

@@ -1,8 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, getUserProfile, updateProfile, signOut } from '../services/authService';
-import { getUserFavorites, getUserWatchlist } from '../services/userService';
-import './Profile.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Navigation from "../components/Navigation";
+import {
+  getCurrentUser,
+  getUserProfile,
+  updateProfile,
+  signOut,
+} from "../services/authService";
+import { getUserFavorites, getUserWatchlist } from "../services/userService";
+import "./Profile.css";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -11,7 +17,9 @@ const Profile = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeSection, setActiveSection] = useState("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +30,7 @@ const Profile = () => {
     try {
       const { user: currentUser } = await getCurrentUser();
       if (!currentUser) {
-        navigate('/login');
+        navigate("/login");
         return;
       }
 
@@ -31,7 +39,7 @@ const Profile = () => {
       const { data: profileData } = await getUserProfile(currentUser.id);
       if (profileData) {
         setProfile(profileData);
-        setUsername(profileData.username || '');
+        setUsername(profileData.username || "");
       }
 
       const { data: favoritesData } = await getUserFavorites(currentUser.id);
@@ -40,7 +48,7 @@ const Profile = () => {
       const { data: watchlistData } = await getUserWatchlist(currentUser.id);
       if (watchlistData) setWatchlist(watchlistData);
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error("Error loading user data:", error);
     } finally {
       setLoading(false);
     }
@@ -53,13 +61,13 @@ const Profile = () => {
       setProfile(data);
       setEditing(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error("Error updating profile:", error);
     }
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
     window.location.reload();
   };
 
@@ -73,6 +81,12 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
+      <Navigation
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onSectionChange={setActiveSection}
+        activeSection={activeSection}
+      />
       <div className="profile-header">
         <h1>My Profile</h1>
         <button onClick={handleSignOut} className="sign-out-button">
@@ -85,7 +99,7 @@ const Profile = () => {
           <div className="profile-avatar">
             {user.email?.charAt(0).toUpperCase()}
           </div>
-          <h2>{profile?.username || 'User'}</h2>
+          <h2>{profile?.username || "User"}</h2>
           <p className="profile-email">{user.email}</p>
 
           {editing ? (
@@ -100,7 +114,10 @@ const Profile = () => {
                 <button onClick={handleUpdateProfile} className="save-button">
                   Save
                 </button>
-                <button onClick={() => setEditing(false)} className="cancel-button">
+                <button
+                  onClick={() => setEditing(false)}
+                  className="cancel-button"
+                >
                   Cancel
                 </button>
               </div>
@@ -130,9 +147,10 @@ const Profile = () => {
               {favorites.map((fav) => (
                 <div key={fav.id} className="item-card">
                   <img
-                    src={fav.movie_data?.poster_path 
-                      ? `https://image.tmdb.org/t/p/w500${fav.movie_data.poster_path}`
-                      : 'https://via.placeholder.com/500x750'
+                    src={
+                      fav.movie_data?.poster_path
+                        ? `https://image.tmdb.org/t/p/w500${fav.movie_data.poster_path}`
+                        : "https://via.placeholder.com/500x750"
                     }
                     alt={fav.movie_data?.title || fav.movie_data?.name}
                   />
@@ -150,9 +168,10 @@ const Profile = () => {
               {watchlist.map((item) => (
                 <div key={item.id} className="item-card">
                   <img
-                    src={item.movie_data?.poster_path 
-                      ? `https://image.tmdb.org/t/p/w500${item.movie_data.poster_path}`
-                      : 'https://via.placeholder.com/500x750'
+                    src={
+                      item.movie_data?.poster_path
+                        ? `https://image.tmdb.org/t/p/w500${item.movie_data.poster_path}`
+                        : "https://via.placeholder.com/500x750"
                     }
                     alt={item.movie_data?.title || item.movie_data?.name}
                   />
@@ -168,4 +187,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
