@@ -77,26 +77,56 @@ export const getUserProfile = async (userId) => {
       .eq("id", userId)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // If table doesn't exist or 406 error, return null data but don't throw
+      if (error.code === 'PGRST116' || error.message.includes('406') || error.message.includes('relation') || error.message.includes('does not exist')) {
+        console.warn('Profiles table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md');
+        return { data: null, error: null }; // Return null data but no error
+      }
+      throw error;
+    }
     return { data, error: null };
   } catch (error) {
+    // Handle 406 Not Acceptable errors gracefully
+    if (error.message && (error.message.includes('406') || error.message.includes('Not Acceptable'))) {
+      console.warn('Profile fetch failed - table may not be set up. Error:', error.message);
+      return { data: null, error: null };
+    }
     return { data: null, error: error.message };
   }
 };
 
-// Update User Profile
+// Update User Profile (uses upsert to create if doesn't exist)
 export const updateProfile = async (userId, updates) => {
   try {
+    // Use upsert to insert if doesn't exist, update if exists
     const { data, error } = await supabase
       .from("profiles")
-      .update(updates)
-      .eq("id", userId)
+      .upsert({
+        id: userId,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'id'
+      })
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // If table doesn't exist, return null without error
+      if (error.code === 'PGRST116' || error.message.includes('406') || error.message.includes('relation') || error.message.includes('does not exist')) {
+        console.warn('Profiles table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md');
+        return { data: null, error: null };
+      }
+      throw error;
+    }
     return { data, error: null };
   } catch (error) {
+    // Handle 406 Not Acceptable errors gracefully
+    if (error.message && (error.message.includes('406') || error.message.includes('Not Acceptable'))) {
+      console.warn('Profile update failed - table may not be set up. Error:', error.message);
+      return { data: null, error: null };
+    }
     return { data: null, error: error.message };
   }
 };

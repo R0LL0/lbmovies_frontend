@@ -26,23 +26,52 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
   }, []);
 
   const handleSectionClick = (section) => {
-    onSectionChange(section);
-    setIsMobileMenuOpen(false);
-    // Smooth scroll to section with offset for sticky nav
-    setTimeout(() => {
-      const element = document.getElementById(`${section === 'all' ? 'movies' : section}-section`);
-      if (element) {
-        const navHeight = document.querySelector('.navigation')?.offsetHeight || 0;
-        const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - navHeight - 20;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      } else if (section === 'all') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    // If we're not on the home page, navigate there first
+    if (window.location.pathname !== '/') {
+      navigate('/');
+      // Wait for navigation, then set section
+      setTimeout(() => {
+        if (onSectionChange) {
+          onSectionChange(section);
+        }
+        // Scroll to section after navigation
+        setTimeout(() => {
+          const element = document.getElementById(`${section === 'all' ? 'movies' : section}-section`);
+          if (element) {
+            const navHeight = document.querySelector('.navigation')?.offsetHeight || 0;
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+            const offsetPosition = elementPosition - navHeight - 20;
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+          } else if (section === 'all') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 300);
+      }, 100);
+    } else {
+      // We're on home page, just change section
+      if (onSectionChange) {
+        onSectionChange(section);
       }
-    }, 100);
+      setIsMobileMenuOpen(false);
+      // Smooth scroll to section with offset for sticky nav
+      setTimeout(() => {
+        const element = document.getElementById(`${section === 'all' ? 'movies' : section}-section`);
+        if (element) {
+          const navHeight = document.querySelector('.navigation')?.offsetHeight || 0;
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - navHeight - 20;
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        } else if (section === 'all') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   const checkUser = async () => {
@@ -62,10 +91,10 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
         <div className="nav-left">
           <div 
             className="logo-container" 
-            onClick={() => window.location.href = 'https://lbmovies.netlify.app/'} 
+            onClick={() => navigate('/')} 
             role="button" 
             tabIndex={0} 
-            onKeyDown={(e) => e.key === 'Enter' && (window.location.href = 'https://lbmovies.netlify.app/')} 
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/')} 
             aria-label="Go to homepage"
           >
             <span className="logo-icon">🔥</span>

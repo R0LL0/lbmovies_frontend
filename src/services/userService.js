@@ -9,9 +9,19 @@ export const getUserFavorites = async (userId) => {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      // Handle table doesn't exist or 406 errors gracefully
+      if (error.code === 'PGRST116' || error.message.includes('406') || error.message.includes('relation') || error.message.includes('does not exist')) {
+        console.warn('Favorites table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md');
+        return { data: [], error: null };
+      }
+      throw error;
+    }
     return { data, error: null };
   } catch (error) {
+    if (error.message && (error.message.includes('406') || error.message.includes('Not Acceptable'))) {
+      return { data: [], error: null };
+    }
     return { data: null, error: error.message };
   }
 };
@@ -66,9 +76,19 @@ export const getUserWatchlist = async (userId) => {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      // Handle table doesn't exist or 406 errors gracefully
+      if (error.code === 'PGRST116' || error.message.includes('406') || error.message.includes('relation') || error.message.includes('does not exist')) {
+        console.warn('Watchlist table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md');
+        return { data: [], error: null };
+      }
+      throw error;
+    }
     return { data, error: null };
   } catch (error) {
+    if (error.message && (error.message.includes('406') || error.message.includes('Not Acceptable'))) {
+      return { data: [], error: null };
+    }
     return { data: null, error: error.message };
   }
 };

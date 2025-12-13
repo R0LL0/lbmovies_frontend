@@ -36,10 +36,21 @@ const Profile = () => {
 
       setUser(currentUser);
 
-      const { data: profileData } = await getUserProfile(currentUser.id);
+      const { data: profileData, error: profileError } = await getUserProfile(currentUser.id);
       if (profileData) {
         setProfile(profileData);
         setUsername(profileData.username || "");
+      } else if (!profileError) {
+        // Profile doesn't exist yet, create it using upsert
+        const { data: newProfile } = await updateProfile(currentUser.id, {
+          email: currentUser.email,
+          username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || 'User',
+          created_at: new Date().toISOString(),
+        });
+        if (newProfile) {
+          setProfile(newProfile);
+          setUsername(newProfile.username || "");
+        }
       }
 
       const { data: favoritesData } = await getUserFavorites(currentUser.id);
