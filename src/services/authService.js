@@ -1,35 +1,26 @@
-import { supabase } from '../config/supabase';
+import { supabase } from "../config/supabase";
 
 // Sign Up
 export const signUp = async (email, password, username) => {
   try {
+    // Get the current site URL for email confirmation redirect
+    const siteUrl = window.location.origin;
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${siteUrl}/`,
         data: {
           username: username,
-        }
-      }
+        },
+      },
     });
 
     if (error) throw error;
 
-    // Create user profile in database
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            email: email,
-            username: username,
-            created_at: new Date().toISOString(),
-          }
-        ]);
-
-      if (profileError) console.error('Profile creation error:', profileError);
-    }
+    // Create user profile in database (will be created after email confirmation)
+    // We'll handle this in a database trigger or after confirmation
 
     return { data, error: null };
   } catch (error) {
@@ -66,7 +57,10 @@ export const signOut = async () => {
 // Get Current User
 export const getCurrentUser = async () => {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
     if (error) throw error;
     return { user, error: null };
   } catch (error) {
@@ -78,9 +72,9 @@ export const getCurrentUser = async () => {
 export const getUserProfile = async (userId) => {
   try {
     const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
       .single();
 
     if (error) throw error;
@@ -94,9 +88,9 @@ export const getUserProfile = async (userId) => {
 export const updateProfile = async (userId, updates) => {
   try {
     const { data, error } = await supabase
-      .from('profiles')
+      .from("profiles")
       .update(updates)
-      .eq('id', userId)
+      .eq("id", userId)
       .select()
       .single();
 
@@ -111,4 +105,3 @@ export const updateProfile = async (userId, updates) => {
 export const onAuthStateChange = (callback) => {
   return supabase.auth.onAuthStateChange(callback);
 };
-

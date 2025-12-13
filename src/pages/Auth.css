@@ -43,6 +43,16 @@
   font-size: 0.9rem;
 }
 
+.auth-success {
+  background: rgba(74, 222, 128, 0.2);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: #4ade80;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
