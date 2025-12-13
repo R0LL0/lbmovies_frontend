@@ -11,7 +11,12 @@ import ActivityFeed from "./pages/ActivityFeed";
 import EmailConfirmation from "./components/EmailConfirmation";
 import Pagination from "@mui/material/Pagination";
 import { CircularProgress, Alert, Typography } from "@mui/material";
-import { discoverMovies, discoverSeries, searchMovies, searchSeries } from "./utils/api";
+import {
+  discoverMovies,
+  discoverSeries,
+  searchMovies,
+  searchSeries,
+} from "./utils/api";
 import "./App.css";
 
 // Custom hook for debouncing
@@ -71,17 +76,9 @@ function App() {
     setLoadingSeries(true);
     setErrorSeries(null);
     try {
-      const url = debouncedSearchTerm
-        ? `${SEARCHAPISERIES}${encodeURIComponent(
-            debouncedSearchTerm
-          )}&page=${pageSeries}`
-        : `${APIURLSERIES}${pageSeries}`;
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = debouncedSearchTerm
+        ? await searchSeries(debouncedSearchTerm, pageSeries)
+        : await discoverSeries(pageSeries);
       setSeries(data);
     } catch (err) {
       setErrorSeries(err.message);
