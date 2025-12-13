@@ -22,3 +22,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# SQL files (contain database schema - keep local only)
+*.sql
+SUPABASE_*.sql
