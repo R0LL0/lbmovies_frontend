@@ -5,8 +5,10 @@ import { Link } from 'react-router-dom';
 import './App.css';
 import { makeStyles } from '@mui/styles';
 
-const APIURLTV = "https://api.themoviedb.org/3/discover/tv?sort_by=popularity.desc&api_key=5003d23dedc1001d745759e4c7ffe979&page=";
-const SEARCHAPI = "https://api.themoviedb.org/3/search/tv?&api_key=5003d23dedc1001d745759e4c7ffe979&query=";
+// This file appears to be unused - API calls are now handled through netlify functions
+// Keeping for reference but API key removed for security
+const APIURLTV = "https://api.themoviedb.org/3/discover/tv?sort_by=popularity.desc&api_key=YOUR_API_KEY&page=";
+const SEARCHAPI = "https://api.themoviedb.org/3/search/tv?&api_key=YOUR_API_KEY&query=";
 
 function App() {
   const [movies, setMovies] = useState([]);
