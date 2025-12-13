@@ -153,6 +153,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for favorites
+DROP TRIGGER IF EXISTS on_favorite_created ON favorites;
 CREATE TRIGGER on_favorite_created
   AFTER INSERT ON favorites
   FOR EACH ROW
@@ -175,6 +176,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for watchlist
+DROP TRIGGER IF EXISTS on_watchlist_created ON watchlist;
 CREATE TRIGGER on_watchlist_created
   AFTER INSERT ON watchlist
   FOR EACH ROW
@@ -197,6 +199,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for reviews
+DROP TRIGGER IF EXISTS on_review_created ON reviews;
 CREATE TRIGGER on_review_created
   AFTER INSERT ON reviews
   FOR EACH ROW
