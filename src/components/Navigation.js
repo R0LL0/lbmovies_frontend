@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getCurrentUser, onAuthStateChange } from '../services/authService';
-import './Navigation.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser, onAuthStateChange } from "../services/authService";
+import "./Navigation.css";
 
-const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection }) => {
+const Navigation = ({
+  searchTerm,
+  onSearchChange,
+  onSectionChange,
+  activeSection,
+}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState(null);
@@ -11,7 +16,9 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
 
   useEffect(() => {
     checkUser();
-    const { data: { subscription } } = onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
@@ -21,14 +28,22 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleSectionClick = (section) => {
+    // Check if it's a route (like activity feed)
+    const navItem = navItems.find((item) => item.id === section);
+    if (navItem?.isRoute) {
+      navigate(`/${section}`);
+      setIsMobileMenuOpen(false);
+      return;
+    }
+
     // If we're not on the home page, navigate there first
-    if (window.location.pathname !== '/') {
-      navigate('/');
+    if (window.location.pathname !== "/") {
+      navigate("/");
       // Wait for navigation, then set section
       setTimeout(() => {
         if (onSectionChange) {
@@ -36,17 +51,21 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
         }
         // Scroll to section after navigation
         setTimeout(() => {
-          const element = document.getElementById(`${section === 'all' ? 'movies' : section}-section`);
+          const element = document.getElementById(
+            `${section === "all" ? "movies" : section}-section`
+          );
           if (element) {
-            const navHeight = document.querySelector('.navigation')?.offsetHeight || 0;
-            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+            const navHeight =
+              document.querySelector(".navigation")?.offsetHeight || 0;
+            const elementPosition =
+              element.getBoundingClientRect().top + window.pageYOffset;
             const offsetPosition = elementPosition - navHeight - 20;
             window.scrollTo({
               top: offsetPosition,
-              behavior: 'smooth'
+              behavior: "smooth",
             });
-          } else if (section === 'all') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (section === "all") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }
         }, 300);
       }, 100);
@@ -58,17 +77,21 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
       setIsMobileMenuOpen(false);
       // Smooth scroll to section with offset for sticky nav
       setTimeout(() => {
-        const element = document.getElementById(`${section === 'all' ? 'movies' : section}-section`);
+        const element = document.getElementById(
+          `${section === "all" ? "movies" : section}-section`
+        );
         if (element) {
-          const navHeight = document.querySelector('.navigation')?.offsetHeight || 0;
-          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+          const navHeight =
+            document.querySelector(".navigation")?.offsetHeight || 0;
+          const elementPosition =
+            element.getBoundingClientRect().top + window.pageYOffset;
           const offsetPosition = elementPosition - navHeight - 20;
           window.scrollTo({
             top: offsetPosition,
-            behavior: 'smooth'
+            behavior: "smooth",
           });
-        } else if (section === 'all') {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (section === "all") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
       }, 100);
     }
@@ -80,21 +103,22 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
   };
 
   const navItems = [
-    { id: 'all', label: 'All', icon: '🎬' },
-    { id: 'movies', label: 'Movies', icon: '🎥' },
-    { id: 'series', label: 'Series', icon: '📺' },
+    { id: "all", label: "All", icon: "🎬" },
+    { id: "movies", label: "Movies", icon: "🎥" },
+    { id: "series", label: "Series", icon: "📺" },
+    { id: "activity", label: "Activity", icon: "📰", isRoute: true },
   ];
 
   return (
-    <nav className={`navigation ${isScrolled ? 'scrolled' : ''}`}>
+    <nav className={`navigation ${isScrolled ? "scrolled" : ""}`}>
       <div className="nav-container">
         <div className="nav-left">
-          <div 
-            className="logo-container" 
-            onClick={() => navigate('/')} 
-            role="button" 
-            tabIndex={0} 
-            onKeyDown={(e) => e.key === 'Enter' && navigate('/')} 
+          <div
+            className="logo-container"
+            onClick={() => navigate("/")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && navigate("/")}
             aria-label="Go to homepage"
           >
             <span className="logo-icon">🔥</span>
@@ -105,17 +129,17 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
         <div className="nav-center">
           <div className="search-container">
             <span className="search-icon">🔍</span>
-            <input 
-              className="search-input" 
-              type="search" 
-              placeholder="Search movies and series..." 
-              value={searchTerm} 
+            <input
+              className="search-input"
+              type="search"
+              placeholder="Search movies and series..."
+              value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
               aria-label="Search movies and series"
             />
             {searchTerm && (
-              <button 
-                className="search-clear-btn" 
+              <button
+                className="search-clear-btn"
                 onClick={() => onSearchChange("")}
                 aria-label="Clear search"
               >
@@ -130,7 +154,9 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
             {navItems.map((item) => (
               <li key={item.id}>
                 <button
-                  className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+                  className={`nav-item ${
+                    activeSection === item.id ? "active" : ""
+                  }`}
                   onClick={() => handleSectionClick(item.id)}
                   aria-label={`View ${item.label}`}
                 >
@@ -143,7 +169,7 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
               <li>
                 <button
                   className="nav-item"
-                  onClick={() => navigate('/profile')}
+                  onClick={() => navigate("/profile")}
                   aria-label="View Profile"
                 >
                   <span className="nav-icon">👤</span>
@@ -154,7 +180,7 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
               <li>
                 <button
                   className="nav-item"
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate("/login")}
                   aria-label="Sign In"
                 >
                   <span className="nav-icon">🔐</span>
@@ -170,7 +196,7 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
             aria-label="Toggle menu"
             aria-expanded={isMobileMenuOpen}
           >
-            <span className={`hamburger ${isMobileMenuOpen ? 'open' : ''}`}>
+            <span className={`hamburger ${isMobileMenuOpen ? "open" : ""}`}>
               <span></span>
               <span></span>
               <span></span>
@@ -179,12 +205,14 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
         </div>
       </div>
 
-      <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
+      <div className={`mobile-menu ${isMobileMenuOpen ? "open" : ""}`}>
         <ul className="mobile-nav-menu">
           {navItems.map((item) => (
             <li key={item.id}>
               <button
-                className={`mobile-nav-item ${activeSection === item.id ? 'active' : ''}`}
+                className={`mobile-nav-item ${
+                  activeSection === item.id ? "active" : ""
+                }`}
                 onClick={() => handleSectionClick(item.id)}
               >
                 <span className="nav-icon">{item.icon}</span>
@@ -199,4 +227,3 @@ const Navigation = ({ searchTerm, onSearchChange, onSectionChange, activeSection
 };
 
 export default Navigation;
-

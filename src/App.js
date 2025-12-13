@@ -7,6 +7,7 @@ import MovieDetail from "./pages/MovieDetail";
 import SeriesDetail from "./pages/SeriesDetail";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import ActivityFeed from "./pages/ActivityFeed";
 import EmailConfirmation from "./components/EmailConfirmation";
 import Pagination from "@mui/material/Pagination";
 import { CircularProgress, Alert, Typography } from "@mui/material";
@@ -178,6 +179,7 @@ function App() {
       <Route path="/series/:id" element={<SeriesDetail />} />
       <Route path="/login" element={<Login />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/activity" element={<ActivityFeed />} />
       <Route path="/auth/callback" element={<EmailConfirmation />} />
       <Route
         path="/"

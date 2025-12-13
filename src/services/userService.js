@@ -1,25 +1,36 @@
-import { supabase } from '../config/supabase';
+import { supabase } from "../config/supabase";
 
 // Get User Favorites
 export const getUserFavorites = async (userId) => {
   try {
     const { data, error } = await supabase
-      .from('favorites')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .from("favorites")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) {
       // Handle table doesn't exist or 406 errors gracefully
-      if (error.code === 'PGRST116' || error.message.includes('406') || error.message.includes('relation') || error.message.includes('does not exist')) {
-        console.warn('Favorites table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md');
+      if (
+        error.code === "PGRST116" ||
+        error.message.includes("406") ||
+        error.message.includes("relation") ||
+        error.message.includes("does not exist")
+      ) {
+        console.warn(
+          "Favorites table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md"
+        );
         return { data: [], error: null };
       }
       throw error;
     }
     return { data, error: null };
   } catch (error) {
-    if (error.message && (error.message.includes('406') || error.message.includes('Not Acceptable'))) {
+    if (
+      error.message &&
+      (error.message.includes("406") ||
+        error.message.includes("Not Acceptable"))
+    ) {
       return { data: [], error: null };
     }
     return { data: null, error: error.message };
@@ -30,7 +41,7 @@ export const getUserFavorites = async (userId) => {
 export const addToFavorites = async (userId, movieId, movieType, movieData) => {
   try {
     const { data, error } = await supabase
-      .from('favorites')
+      .from("favorites")
       .insert([
         {
           user_id: userId,
@@ -38,7 +49,7 @@ export const addToFavorites = async (userId, movieId, movieType, movieData) => {
           movie_type: movieType,
           movie_data: movieData,
           created_at: new Date().toISOString(),
-        }
+        },
       ])
       .select()
       .single();
@@ -54,11 +65,11 @@ export const addToFavorites = async (userId, movieId, movieType, movieData) => {
 export const removeFromFavorites = async (userId, movieId, movieType) => {
   try {
     const { error } = await supabase
-      .from('favorites')
+      .from("favorites")
       .delete()
-      .eq('user_id', userId)
-      .eq('movie_id', movieId)
-      .eq('movie_type', movieType);
+      .eq("user_id", userId)
+      .eq("movie_id", movieId)
+      .eq("movie_type", movieType);
 
     if (error) throw error;
     return { error: null };
@@ -71,22 +82,33 @@ export const removeFromFavorites = async (userId, movieId, movieType) => {
 export const getUserWatchlist = async (userId) => {
   try {
     const { data, error } = await supabase
-      .from('watchlist')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .from("watchlist")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) {
       // Handle table doesn't exist or 406 errors gracefully
-      if (error.code === 'PGRST116' || error.message.includes('406') || error.message.includes('relation') || error.message.includes('does not exist')) {
-        console.warn('Watchlist table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md');
+      if (
+        error.code === "PGRST116" ||
+        error.message.includes("406") ||
+        error.message.includes("relation") ||
+        error.message.includes("does not exist")
+      ) {
+        console.warn(
+          "Watchlist table may not exist yet. Run the SQL setup from SUPABASE_SETUP.md"
+        );
         return { data: [], error: null };
       }
       throw error;
     }
     return { data, error: null };
   } catch (error) {
-    if (error.message && (error.message.includes('406') || error.message.includes('Not Acceptable'))) {
+    if (
+      error.message &&
+      (error.message.includes("406") ||
+        error.message.includes("Not Acceptable"))
+    ) {
       return { data: [], error: null };
     }
     return { data: null, error: error.message };
@@ -97,7 +119,7 @@ export const getUserWatchlist = async (userId) => {
 export const addToWatchlist = async (userId, movieId, movieType, movieData) => {
   try {
     const { data, error } = await supabase
-      .from('watchlist')
+      .from("watchlist")
       .insert([
         {
           user_id: userId,
@@ -105,7 +127,7 @@ export const addToWatchlist = async (userId, movieId, movieType, movieData) => {
           movie_type: movieType,
           movie_data: movieData,
           created_at: new Date().toISOString(),
-        }
+        },
       ])
       .select()
       .single();
@@ -121,11 +143,11 @@ export const addToWatchlist = async (userId, movieId, movieType, movieData) => {
 export const removeFromWatchlist = async (userId, movieId, movieType) => {
   try {
     const { error } = await supabase
-      .from('watchlist')
+      .from("watchlist")
       .delete()
-      .eq('user_id', userId)
-      .eq('movie_id', movieId)
-      .eq('movie_type', movieType);
+      .eq("user_id", userId)
+      .eq("movie_id", movieId)
+      .eq("movie_type", movieType);
 
     if (error) throw error;
     return { error: null };
@@ -138,10 +160,10 @@ export const removeFromWatchlist = async (userId, movieId, movieType) => {
 export const getUserReviews = async (userId) => {
   try {
     const { data, error } = await supabase
-      .from('reviews')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+      .from("reviews")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     return { data, error: null };
@@ -151,10 +173,16 @@ export const getUserReviews = async (userId) => {
 };
 
 // Create Review
-export const createReview = async (userId, movieId, movieType, rating, content) => {
+export const createReview = async (
+  userId,
+  movieId,
+  movieType,
+  rating,
+  content
+) => {
   try {
     const { data, error } = await supabase
-      .from('reviews')
+      .from("reviews")
       .insert([
         {
           user_id: userId,
@@ -163,7 +191,7 @@ export const createReview = async (userId, movieId, movieType, rating, content) 
           rating: rating,
           content: content,
           created_at: new Date().toISOString(),
-        }
+        },
       ])
       .select()
       .single();
@@ -174,4 +202,3 @@ export const createReview = async (userId, movieId, movieType, rating, content) 
     return { data: null, error: error.message };
   }
 };
-
