@@ -426,7 +426,12 @@ body::before {
 /* Ensure images are properly displayed */
 .movie-image-wrapper img,
 .serie-image-wrapper img {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   z-index: 2;
   opacity: 1;
   transition: opacity 0.3s ease;

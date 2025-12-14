@@ -81,7 +81,7 @@ const Movie = ({ id, title, poster_path, overview, release_date, vote_average })
           style={{ 
             display: imageLoading ? 'none' : 'block',
             width: '100%',
-            height: '100%',
+            height: 'auto',
             objectFit: 'cover'
           }}
           loading="lazy"
