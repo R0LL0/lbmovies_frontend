@@ -149,10 +149,51 @@ function App() {
     []
   );
 
-  const shouldShowMovies =
-    activeSection === "all" || activeSection === "movies";
-  const shouldShowSeries =
-    activeSection === "all" || activeSection === "series";
+  // Combine movies and series for "all" view, or show separately
+  const displayItems = useMemo(() => {
+    if (activeSection === "all") {
+      const moviesList = (movies?.results || []).map(item => ({ ...item, type: 'movie' }));
+      const seriesList = (series?.results || []).map(item => ({ ...item, type: 'series' }));
+      return [...moviesList, ...seriesList].sort((a, b) => {
+        // Sort by popularity score
+        const aScore = (a.vote_average || 0) * (a.vote_count || 0);
+        const bScore = (b.vote_average || 0) * (b.vote_count || 0);
+        return bScore - aScore;
+      });
+    } else if (activeSection === "movies") {
+      return (movies?.results || []).map(item => ({ ...item, type: 'movie' }));
+    } else if (activeSection === "series") {
+      return (series?.results || []).map(item => ({ ...item, type: 'series' }));
+    }
+    return [];
+  }, [activeSection, movies, series]);
+
+  const currentPage = activeSection === "movies" ? pageMovies : activeSection === "series" ? pageSeries : pageMovies;
+  const totalPages = activeSection === "movies" 
+    ? (movies?.total_pages || 0)
+    : activeSection === "series"
+    ? (series?.total_pages || 0)
+    : Math.max(movies?.total_pages || 0, series?.total_pages || 0);
+  
+  const isLoading = activeSection === "movies" ? loadingMovies : activeSection === "series" ? loadingSeries : (loadingMovies || loadingSeries);
+  const hasError = activeSection === "movies" ? errorMovies : activeSection === "series" ? errorSeries : (errorMovies || errorSeries);
+  const totalResults = activeSection === "all"
+    ? ((movies?.total_results || 0) + (series?.total_results || 0))
+    : activeSection === "movies"
+    ? (movies?.total_results || 0)
+    : (series?.total_results || 0);
+
+  const handlePageChange = (event, value) => {
+    if (activeSection === "movies") {
+      setPageMovies(value);
+    } else if (activeSection === "series") {
+      setPageSeries(value);
+    } else {
+      setPageMovies(value);
+      setPageSeries(value);
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <Routes>
@@ -174,195 +215,97 @@ function App() {
             />
 
             <main className="main-content">
-              {/* Movies Section */}
-              {shouldShowMovies && (
-                <section
-                  id="movies-section"
-                  className="content-section"
-                  aria-labelledby="movies-heading"
-                >
-                  <div className="section-header">
-                    <Typography
-                      variant="h2"
-                      component="h1"
-                      id="movies-heading"
-                      className="section-title"
-                    >
-                      {debouncedSearchTerm ? (
-                        <>🔍 Search Results for "{debouncedSearchTerm}"</>
-                      ) : (
-                        <>🎥 Most Popular Movies</>
-                      )}
-                    </Typography>
-                    {movies && !loadingMovies && (
-                      <Typography variant="body2" className="section-subtitle">
-                        {movies.total_results}{" "}
-                        {movies.total_results === 1 ? "result" : "results"}{" "}
-                        found
-                      </Typography>
+              {/* Unified Content Section */}
+              <section className="content-section">
+                <div className="section-header">
+                  <Typography
+                    variant="h2"
+                    component="h1"
+                    className="section-title"
+                  >
+                    {debouncedSearchTerm ? (
+                      <>🔍 Search Results for "{debouncedSearchTerm}"</>
+                    ) : activeSection === "all" ? (
+                      <>🎬 All Content</>
+                    ) : activeSection === "movies" ? (
+                      <>🎥 Movies</>
+                    ) : (
+                      <>📺 Series</>
                     )}
-                  </div>
-
-                  {errorMovies && (
-                    <Alert severity="error" className="error-alert">
-                      Failed to load movies: {errorMovies}
-                    </Alert>
-                  )}
-
-                  {loadingMovies ? (
-                    <>
-                      <div className="skeleton-grid">
-                        {[...Array(6)].map((_, index) => (
-                          <div key={index} className="skeleton-card">
-                            <div className="skeleton-image"></div>
-                            <div className="skeleton-content">
-                              <div className="skeleton-line"></div>
-                              <div className="skeleton-line short"></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="movie-container">
-                        {movies?.results?.length > 0
-                          ? movies.results.map((movie) => (
-                              <Movie key={movie.id} {...movie} />
-                            ))
-                          : !errorMovies && (
-                              <div className="empty-state">
-                                <div
-                                  style={{
-                                    fontSize: "4rem",
-                                    marginBottom: "1rem",
-                                  }}
-                                >
-                                  🎬
-                                </div>
-                                <Typography variant="h5">
-                                  No movies found
-                                </Typography>
-                                <Typography variant="body2">
-                                  Try adjusting your search terms or browse
-                                  popular movies
-                                </Typography>
-                              </div>
-                            )}
-                      </div>
-
-                      {movies?.total_pages > 1 && (
-                        <div className="movie-pagination">
-                          <Pagination
-                            classes={paginationStyles}
-                            count={Math.min(movies.total_pages, 500)}
-                            page={pageMovies}
-                            onChange={handleOnPageChangeMovies}
-                            variant="outlined"
-                            color="primary"
-                            size="large"
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
-                </section>
-              )}
-
-              {/* Series Section */}
-              {shouldShowSeries && (
-                <section
-                  id="series-section"
-                  className="content-section"
-                  aria-labelledby="series-heading"
-                >
-                  <div className="section-header">
-                    <Typography
-                      variant="h2"
-                      component="h1"
-                      id="series-heading"
-                      className="section-title"
-                    >
-                      {debouncedSearchTerm ? (
-                        <>🔍 Search Results for "{debouncedSearchTerm}"</>
-                      ) : (
-                        <>📺 Most Popular Series</>
-                      )}
+                  </Typography>
+                  {!isLoading && totalResults > 0 && (
+                    <Typography variant="body2" className="section-subtitle">
+                      {totalResults}{" "}
+                      {totalResults === 1 ? "result" : "results"} found
                     </Typography>
-                    {series && !loadingSeries && (
-                      <Typography variant="body2" className="section-subtitle">
-                        {series.total_results}{" "}
-                        {series.total_results === 1 ? "result" : "results"}{" "}
-                        found
-                      </Typography>
-                    )}
-                  </div>
-
-                  {errorSeries && (
-                    <Alert severity="error" className="error-alert">
-                      Failed to load series: {errorSeries}
-                    </Alert>
                   )}
+                </div>
 
-                  {loadingSeries ? (
-                    <>
-                      <div className="skeleton-grid">
-                        {[...Array(6)].map((_, index) => (
-                          <div key={index} className="skeleton-card">
-                            <div className="skeleton-image"></div>
-                            <div className="skeleton-content">
-                              <div className="skeleton-line"></div>
-                              <div className="skeleton-line short"></div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="serie-container">
-                        {series?.results?.length > 0
-                          ? series.results.map((serie) => (
-                              <Serie key={serie.id} {...serie} />
-                            ))
-                          : !errorSeries && (
-                              <div className="empty-state">
-                                <div
-                                  style={{
-                                    fontSize: "4rem",
-                                    marginBottom: "1rem",
-                                  }}
-                                >
-                                  📺
-                                </div>
-                                <Typography variant="h5">
-                                  No series found
-                                </Typography>
-                                <Typography variant="body2">
-                                  Try adjusting your search terms or browse
-                                  popular series
-                                </Typography>
-                              </div>
-                            )}
-                      </div>
+                {hasError && (
+                  <Alert severity="error" className="error-alert">
+                    Failed to load content: {hasError}
+                  </Alert>
+                )}
 
-                      {series?.total_pages > 1 && (
-                        <div className="serie-pagination">
-                          <Pagination
-                            classes={paginationStyles}
-                            count={Math.min(series.total_pages, 500)}
-                            page={pageSeries}
-                            onChange={handleOnPageChangeSeries}
-                            variant="outlined"
-                            color="primary"
-                            size="large"
-                          />
+                {isLoading ? (
+                  <div className="skeleton-grid">
+                    {[...Array(12)].map((_, index) => (
+                      <div key={index} className="skeleton-card">
+                        <div className="skeleton-image"></div>
+                        <div className="skeleton-content">
+                          <div className="skeleton-line"></div>
+                          <div className="skeleton-line short"></div>
                         </div>
-                      )}
-                    </>
-                  )}
-                </section>
-              )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <div className="unified-content-grid">
+                      {displayItems.length > 0
+                        ? displayItems.map((item) =>
+                            item.type === "movie" ? (
+                              <Movie key={`movie-${item.id}`} {...item} />
+                            ) : (
+                              <Serie key={`series-${item.id}`} {...item} />
+                            )
+                          )
+                        : !hasError && (
+                            <div className="empty-state">
+                              <div
+                                style={{
+                                  fontSize: "4rem",
+                                  marginBottom: "1rem",
+                                }}
+                              >
+                                {activeSection === "all" ? "🎬" : activeSection === "movies" ? "🎥" : "📺"}
+                              </div>
+                              <Typography variant="h5">
+                                No {activeSection === "all" ? "content" : activeSection === "movies" ? "movies" : "series"} found
+                              </Typography>
+                              <Typography variant="body2">
+                                Try adjusting your search terms or browse popular content
+                              </Typography>
+                            </div>
+                          )}
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="unified-pagination">
+                        <Pagination
+                          classes={paginationStyles}
+                          count={Math.min(totalPages, 500)}
+                          page={currentPage}
+                          onChange={handlePageChange}
+                          variant="outlined"
+                          color="primary"
+                          size="large"
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </section>
             </main>
 
             <footer className="movie-footer">

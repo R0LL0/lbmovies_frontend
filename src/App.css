@@ -253,12 +253,49 @@ body::before {
   opacity: 0.8;
 }
 
-/* Movie/Serie Containers */
+/* Unified Content Grid - Modern Layout */
+.unified-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 0;
+  width: 100%;
+}
+
+@media (min-width: 1400px) {
+  .unified-content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 1200px) {
+  .unified-content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .unified-content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .unified-content-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+}
+
+/* Legacy containers - keeping for compatibility */
 .movie-container,
 .serie-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
   justify-items: center;
   padding: 2rem 0;
 }
@@ -266,7 +303,7 @@ body::before {
 @media (max-width: 1200px) {
   .movie-container,
   .serie-container {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1.5rem;
   }
 }
@@ -274,20 +311,20 @@ body::before {
 @media (max-width: 768px) {
   .movie-container,
   .serie-container {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.25rem;
   }
 }
 
 @media (max-width: 480px) {
   .movie-container,
   .serie-container {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
   }
 }
 
-/* Movie/Serie Cards - Modern Design */
+/* Movie/Serie Cards - Modern Compact Design */
 .movie,
 .serie {
   background: var(--card-bg);
@@ -296,11 +333,13 @@ body::before {
   overflow: hidden;
   position: relative;
   width: 100%;
-  max-width: 320px;
+  max-width: 100%;
   transition: var(--transition);
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.05);
   animation: cardFadeIn 0.6s ease-out backwards;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes cardFadeIn {
@@ -359,7 +398,7 @@ body::before {
 .serie-image-wrapper {
   position: relative;
   width: 100%;
-  padding-top: 150%;
+  padding-top: 140%; /* Reduced from 150% to make cards less tall */
   overflow: hidden;
   background: linear-gradient(135deg, #1e2746 0%, #141b2d 100%);
   z-index: 2;
