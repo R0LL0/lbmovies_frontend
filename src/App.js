@@ -10,7 +10,7 @@ import Profile from "./pages/Profile";
 import ActivityFeed from "./pages/ActivityFeed";
 import EmailConfirmation from "./components/EmailConfirmation";
 import Pagination from "@mui/material/Pagination";
-import { CircularProgress, Alert, Typography } from "@mui/material";
+import { Alert, Typography } from "@mui/material";
 import {
   discoverMovies,
   discoverSeries,
@@ -104,15 +104,6 @@ function App() {
     setActiveSection(section);
   };
 
-  const handleOnPageChangeMovies = (event, value) => {
-    setPageMovies(value);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleOnPageChangeSeries = (event, value) => {
-    setPageSeries(value);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
 
   const currentYear = new Date().getFullYear();
 
