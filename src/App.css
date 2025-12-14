@@ -650,6 +650,17 @@ body::before {
   font-weight: 400;
 }
 
+/* Unified Pagination */
+.unified-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 3rem 0 2rem 0;
+  padding: 2rem 0;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--border-radius-lg);
+}
+
 /* Pagination - Modern Design */
 .movie-pagination,
 .serie-pagination {
