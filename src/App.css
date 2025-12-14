@@ -423,6 +423,20 @@ body::before {
   }
 }
 
+/* Ensure images are properly displayed */
+.movie-image-wrapper img,
+.serie-image-wrapper img {
+  position: relative;
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.movie-image-wrapper img[style*="display: none"],
+.serie-image-wrapper img[style*="display: none"] {
+  opacity: 0;
+}
+
 .movie-rating-badge,
 .serie-rating-badge {
   position: absolute;

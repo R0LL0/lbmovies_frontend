@@ -37,6 +37,17 @@ const Movie = ({ id, title, poster_path, overview, release_date, vote_average })
   const imageUrl = poster_path ? `${IMGPATH}${poster_path}` : IMGPATH_FALLBACK;
   const displayImageUrl = imageError ? IMGPATH_FALLBACK : imageUrl;
 
+  // Timeout to hide skeleton if image takes too long to load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (imageLoading) {
+        setImageLoading(false);
+      }
+    }, 5000); // Hide skeleton after 5 seconds max
+
+    return () => clearTimeout(timer);
+  }, [imageLoading]);
+
   const handleClick = () => {
     if (id) {
       navigate(`/movie/${id}`);
@@ -60,9 +71,19 @@ const Movie = ({ id, title, poster_path, overview, release_date, vote_average })
         <img
           src={displayImageUrl}
           alt={title || 'Movie poster'}
-          onError={() => setImageError(true)}
-          onLoad={() => setImageLoading(false)}
-          style={{ display: imageLoading ? 'none' : 'block' }}
+          onError={() => {
+            setImageError(true);
+            setImageLoading(false);
+          }}
+          onLoad={() => {
+            setImageLoading(false);
+          }}
+          style={{ 
+            display: imageLoading ? 'none' : 'block',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
           loading="lazy"
         />
         <div className="movie-rating-badge">
