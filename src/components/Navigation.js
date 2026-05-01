@@ -3,6 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentUser, onAuthStateChange } from "../services/authService";
 import "./Navigation.css";
 
+const NAV_ITEMS = [
+  { id: "all", label: "All", icon: "🎬" },
+  { id: "movies", label: "Movies", icon: "🎥" },
+  { id: "series", label: "Series", icon: "📺" },
+  { id: "activity", label: "Activity", icon: "📰", isRoute: true },
+];
+
+const SCROLL_TARGET_ID = "browse-section";
+
+const scrollToBrowse = () => {
+  const el = document.getElementById(SCROLL_TARGET_ID);
+  if (!el) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  const navHeight = document.querySelector(".navigation")?.offsetHeight || 0;
+  const top = el.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+  window.scrollTo({ top, behavior: "smooth" });
+};
+
 const Navigation = ({
   searchTerm,
   onSearchChange,
@@ -15,99 +35,61 @@ const Navigation = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkUser();
+    let mounted = true;
+    (async () => {
+      const { user: u } = await getCurrentUser();
+      if (mounted) setUser(u);
+    })();
     const {
       data: { subscription },
     } = onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleSectionClick = (section) => {
-    // Check if it's a route (like activity feed)
-    const navItem = navItems.find((item) => item.id === section);
-    if (navItem?.isRoute) {
+    setIsMobileMenuOpen(false);
+
+    const item = NAV_ITEMS.find((i) => i.id === section);
+    if (item?.isRoute) {
       navigate(`/${section}`);
-      setIsMobileMenuOpen(false);
       return;
     }
 
-    // If we're not on the home page, navigate there first
+    const onHome = window.location.pathname === "/";
+
+    if (!onHome) {
+      navigate("/");
+      // give the home page a tick to mount
+      setTimeout(() => {
+        if (onSectionChange) onSectionChange(section);
+        setTimeout(scrollToBrowse, 60);
+      }, 80);
+      return;
+    }
+
+    if (onSectionChange) onSectionChange(section);
+    setTimeout(scrollToBrowse, 30);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
     if (window.location.pathname !== "/") {
       navigate("/");
-      // Wait for navigation, then set section
-      setTimeout(() => {
-        if (onSectionChange) {
-          onSectionChange(section);
-        }
-        // Scroll to section after navigation
-        setTimeout(() => {
-          const element = document.getElementById(
-            `${section === "all" ? "movies" : section}-section`
-          );
-          if (element) {
-            const navHeight =
-              document.querySelector(".navigation")?.offsetHeight || 0;
-            const elementPosition =
-              element.getBoundingClientRect().top + window.pageYOffset;
-            const offsetPosition = elementPosition - navHeight - 20;
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth",
-            });
-          } else if (section === "all") {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }
-        }, 300);
-      }, 100);
-    } else {
-      // We're on home page, just change section
-      if (onSectionChange) {
-        onSectionChange(section);
-      }
-      setIsMobileMenuOpen(false);
-      // Smooth scroll to section with offset for sticky nav
-      setTimeout(() => {
-        const element = document.getElementById(
-          `${section === "all" ? "movies" : section}-section`
-        );
-        if (element) {
-          const navHeight =
-            document.querySelector(".navigation")?.offsetHeight || 0;
-          const elementPosition =
-            element.getBoundingClientRect().top + window.pageYOffset;
-          const offsetPosition = elementPosition - navHeight - 20;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth",
-          });
-        } else if (section === "all") {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-      }, 100);
     }
+    setTimeout(scrollToBrowse, 100);
   };
-
-  const checkUser = async () => {
-    const { user } = await getCurrentUser();
-    setUser(user);
-  };
-
-  const navItems = [
-    { id: "all", label: "All", icon: "🎬" },
-    { id: "movies", label: "Movies", icon: "🎥" },
-    { id: "series", label: "Series", icon: "📺" },
-    { id: "activity", label: "Activity", icon: "📰", isRoute: true },
-  ];
 
   return (
     <nav className={`navigation ${isScrolled ? "scrolled" : ""}`}>
@@ -127,36 +109,35 @@ const Navigation = ({
         </div>
 
         <div className="nav-center">
-          <div className="search-container">
-            <span className="search-icon">🔍</span>
+          <form className="search-container" onSubmit={handleSearchSubmit} role="search">
+            <span className="search-icon" aria-hidden="true">🔍</span>
             <input
               className="search-input"
               type="search"
               placeholder="Search movies and series..."
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={searchTerm || ""}
+              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
               aria-label="Search movies and series"
             />
             {searchTerm && (
               <button
+                type="button"
                 className="search-clear-btn"
-                onClick={() => onSearchChange("")}
+                onClick={() => onSearchChange && onSearchChange("")}
                 aria-label="Clear search"
               >
                 ×
               </button>
             )}
-          </div>
+          </form>
         </div>
 
         <div className="nav-right">
           <ul className="nav-menu">
-            {navItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <li key={item.id}>
                 <button
-                  className={`nav-item ${
-                    activeSection === item.id ? "active" : ""
-                  }`}
+                  className={`nav-item ${activeSection === item.id ? "active" : ""}`}
                   onClick={() => handleSectionClick(item.id)}
                   aria-label={`View ${item.label}`}
                 >
@@ -179,7 +160,7 @@ const Navigation = ({
             ) : (
               <li>
                 <button
-                  className="nav-item"
+                  className="nav-item nav-item--cta"
                   onClick={() => navigate("/login")}
                   aria-label="Sign In"
                 >
@@ -207,12 +188,10 @@ const Navigation = ({
 
       <div className={`mobile-menu ${isMobileMenuOpen ? "open" : ""}`}>
         <ul className="mobile-nav-menu">
-          {navItems.map((item) => (
+          {NAV_ITEMS.map((item) => (
             <li key={item.id}>
               <button
-                className={`mobile-nav-item ${
-                  activeSection === item.id ? "active" : ""
-                }`}
+                className={`mobile-nav-item ${activeSection === item.id ? "active" : ""}`}
                 onClick={() => handleSectionClick(item.id)}
               >
                 <span className="nav-icon">{item.icon}</span>
@@ -220,6 +199,33 @@ const Navigation = ({
               </button>
             </li>
           ))}
+          {user ? (
+            <li>
+              <button
+                className="mobile-nav-item"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate("/profile");
+                }}
+              >
+                <span className="nav-icon">👤</span>
+                <span className="nav-label">Profile</span>
+              </button>
+            </li>
+          ) : (
+            <li>
+              <button
+                className="mobile-nav-item"
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  navigate("/login");
+                }}
+              >
+                <span className="nav-icon">🔐</span>
+                <span className="nav-label">Sign In</span>
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </nav>

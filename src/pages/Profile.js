@@ -132,7 +132,7 @@ const Profile = () => {
         </button>
       </div>
 
-      <div className="profile-content">
+      <div className="profile-content profile-page-inner">
         <div className="profile-card">
           <div className="profile-avatar">
             {user.email?.charAt(0).toUpperCase()}
@@ -205,9 +205,9 @@ const Profile = () => {
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <>
-            {favorites.length > 0 && (
-              <div className="profile-section">
-                <h2>My Favorites</h2>
+            <div className="profile-section">
+              <h2>My Favorites</h2>
+              {favorites.length > 0 ? (
                 <div className="items-grid">
                   {favorites.map((fav) => (
                     <div
@@ -229,12 +229,25 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon" aria-hidden="true">❤️</div>
+                  <h3>No favorites yet</h3>
+                  <p>Tap the heart on any movie or series to save it here.</p>
+                  <button
+                    type="button"
+                    className="empty-state-cta"
+                    onClick={() => navigate("/")}
+                  >
+                    Browse catalog
+                  </button>
+                </div>
+              )}
+            </div>
 
-            {watchlist.length > 0 && (
-              <div className="profile-section">
-                <h2>My Watchlist</h2>
+            <div className="profile-section">
+              <h2>My Watchlist</h2>
+              {watchlist.length > 0 ? (
                 <div className="items-grid">
                   {watchlist.map((item) => (
                     <div
@@ -258,8 +271,14 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon" aria-hidden="true">➕</div>
+                  <h3>Watchlist is empty</h3>
+                  <p>Save things to watch later by tapping the + on any card.</p>
+                </div>
+              )}
+            </div>
           </>
         )}
 

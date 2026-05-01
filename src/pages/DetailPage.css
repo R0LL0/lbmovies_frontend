@@ -1,7 +1,5 @@
 .detail-page {
   min-height: 100vh;
-  background: radial-gradient(ellipse at top, #1a1f2e 0%, #0a0e1a 50%, #050810 100%);
-  background-attachment: fixed;
   color: var(--text-primary, #ffffff);
 }
 
@@ -40,13 +38,13 @@
 /* Hero Section */
 .detail-hero {
   position: relative;
-  min-height: 80vh;
+  min-height: clamp(560px, 72vh, 760px);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   display: flex;
   align-items: center;
-  padding: 2rem;
+  padding: 3rem 2rem;
 }
 
 .detail-hero-content {
@@ -59,12 +57,13 @@
 
 .back-nav-button {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(10px);
+  top: 1.25rem;
+  left: 1.25rem;
+  background: rgba(0, 0, 0, 0.55) !important;
+  backdrop-filter: blur(12px);
   color: white !important;
   z-index: 10;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   transition: all 0.3s ease;
 }
 

@@ -8,6 +8,7 @@ import "./ActivityFeed.css";
 const ActivityFeed = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [signedIn, setSignedIn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeSection, setActiveSection] = useState("all");
   const navigate = useNavigate();
@@ -20,10 +21,13 @@ const ActivityFeed = () => {
     setLoading(true);
     const { user } = await getCurrentUser();
     if (user) {
+      setSignedIn(true);
       const { data, error } = await getActivityFeed(user.id);
       if (!error && data) {
         setActivities(data);
       }
+    } else {
+      setSignedIn(false);
     }
     setLoading(false);
   };
@@ -97,11 +101,31 @@ const ActivityFeed = () => {
           See what your friends are watching and discussing
         </p>
 
-        {activities.length === 0 ? (
+        {!signedIn ? (
+          <div className="no-activities">
+            <div className="no-activities-icon">🔐</div>
+            <h2>Sign in to see your feed</h2>
+            <p>Follow other users to see what they're watching and reviewing.</p>
+            <button
+              type="button"
+              className="empty-state-cta"
+              onClick={() => navigate("/login")}
+            >
+              Sign In
+            </button>
+          </div>
+        ) : activities.length === 0 ? (
           <div className="no-activities">
             <div className="no-activities-icon">📭</div>
             <h2>No activities yet</h2>
             <p>Follow other users to see their activity in your feed</p>
+            <button
+              type="button"
+              className="empty-state-cta"
+              onClick={() => navigate("/")}
+            >
+              Discover users
+            </button>
           </div>
         ) : (
           <div className="activities-list">

@@ -1,18 +1,41 @@
 .activity-feed-container {
   min-height: 100vh;
-  background: radial-gradient(
-    ellipse at top,
-    #1a1f2e 0%,
-    #0a0e1a 50%,
-    #050810 100%
-  );
   color: var(--text-primary, #ffffff);
 }
 
 .activity-content {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 2.5rem clamp(1rem, 3vw, 2rem) 4rem;
+}
+
+.activity-loading {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary, #a8b3cf);
+}
+
+.no-activities .empty-state-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.7rem 1.6rem;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.4);
+}
+
+.no-activities .empty-state-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(255, 87, 34, 0.5);
 }
 
 .activity-title {

@@ -1,11 +1,18 @@
 .profile-container {
   min-height: 100vh;
-  padding: 2rem;
+  color: var(--text-primary, #ffffff);
+}
+
+.profile-page-inner {
   max-width: 1400px;
   margin: 0 auto;
-  background: radial-gradient(ellipse at top, #1a1f2e 0%, #0a0e1a 50%, #050810 100%);
-  color: var(--text-primary, #ffffff);
-  padding-top: 1rem;
+  padding: 2rem clamp(1rem, 3vw, 2rem) 4rem;
+}
+
+.profile-container > .profile-header {
+  max-width: 1400px;
+  margin: 2rem auto 2.5rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
 }
 
 .profile-loading {
@@ -252,8 +259,48 @@
   text-align: center;
   padding: 4rem 2rem;
   color: var(--text-secondary, #a8b3cf);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.85;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  color: var(--text-primary, #ffffff);
+  font-weight: 700;
+}
+
+.empty-state p {
+  margin: 0 0 1.25rem;
+  font-size: 0.95rem;
+}
+
+.empty-state-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.6rem;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.4);
+}
+
+.empty-state-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(255, 87, 34, 0.5);
 }
 

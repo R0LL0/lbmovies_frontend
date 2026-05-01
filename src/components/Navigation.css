@@ -216,6 +216,24 @@
   opacity: 1;
 }
 
+.nav-item--cta {
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(255, 87, 34, 0.35);
+  border: 1px solid rgba(255, 152, 0, 0.45);
+}
+
+.nav-item--cta:hover {
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 87, 34, 0.5);
+}
+
+.nav-item--cta::before {
+  display: none;
+}
+
 .nav-icon {
   font-size: 1.1rem;
   display: flex;
