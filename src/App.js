@@ -3,6 +3,8 @@ import { Routes, Route } from "react-router-dom";
 import Movie from "./components/Movie";
 import Serie from "./components/Serie";
 import Navigation from "./components/Navigation";
+import HeroCarousel from "./components/HeroCarousel";
+import MediaRow from "./components/MediaRow";
 import MovieDetail from "./pages/MovieDetail";
 import SeriesDetail from "./pages/SeriesDetail";
 import Login from "./pages/Login";
@@ -16,27 +18,25 @@ import {
   discoverSeries,
   searchMovies,
   searchSeries,
+  getTrending,
+  getTopRatedMovies,
+  getTopRatedSeries,
+  getUpcomingMovies,
+  getOnTheAirSeries,
 } from "./utils/api";
 import "./App.css";
 
-// Custom hook for debouncing
 function useDebounce(value, delay) {
   const [debouncedValue, setDebouncedValue] = useState(value);
-
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
   }, [value, delay]);
-
   return debouncedValue;
 }
 
 function App() {
+  // Browse grid (search / discover) state — preserved from prior version
   const [movies, setMovies] = useState(null);
   const [series, setSeries] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,9 +48,21 @@ function App() {
   const [errorMovies, setErrorMovies] = useState(null);
   const [errorSeries, setErrorSeries] = useState(null);
 
+  // Curated rows state
+  const [trending, setTrending] = useState([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
+  const [topMovies, setTopMovies] = useState([]);
+  const [topMoviesLoading, setTopMoviesLoading] = useState(true);
+  const [topSeries, setTopSeries] = useState([]);
+  const [topSeriesLoading, setTopSeriesLoading] = useState(true);
+  const [upcoming, setUpcoming] = useState([]);
+  const [upcomingLoading, setUpcomingLoading] = useState(true);
+  const [airing, setAiring] = useState([]);
+  const [airingLoading, setAiringLoading] = useState(true);
+
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  // Reset to page 1 when search term changes
+  // Reset to page 1 when search changes
   useEffect(() => {
     setPageMovies(1);
     setPageSeries(1);
@@ -88,22 +100,57 @@ function App() {
     }
   }, [debouncedSearchTerm, pageSeries]);
 
+  useEffect(() => { fetchMovies(); }, [fetchMovies]);
+  useEffect(() => { fetchSeries(); }, [fetchSeries]);
+
+  // Fetch curated rows once on mount
   useEffect(() => {
-    fetchMovies();
-  }, [fetchMovies]);
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getTrending("all", "week");
+        if (mounted) setTrending(data?.results || []);
+      } catch (e) { console.error("trending:", e); }
+      finally { if (mounted) setTrendingLoading(false); }
+    })();
 
-  useEffect(() => {
-    fetchSeries();
-  }, [fetchSeries]);
+    (async () => {
+      try {
+        const data = await getTopRatedMovies();
+        if (mounted) setTopMovies(data?.results || []);
+      } catch (e) { console.error("top movies:", e); }
+      finally { if (mounted) setTopMoviesLoading(false); }
+    })();
 
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-  };
+    (async () => {
+      try {
+        const data = await getTopRatedSeries();
+        if (mounted) setTopSeries(data?.results || []);
+      } catch (e) { console.error("top series:", e); }
+      finally { if (mounted) setTopSeriesLoading(false); }
+    })();
 
-  const handleSectionChange = (section) => {
-    setActiveSection(section);
-  };
+    (async () => {
+      try {
+        const data = await getUpcomingMovies();
+        if (mounted) setUpcoming(data?.results || []);
+      } catch (e) { console.error("upcoming:", e); }
+      finally { if (mounted) setUpcomingLoading(false); }
+    })();
 
+    (async () => {
+      try {
+        const data = await getOnTheAirSeries();
+        if (mounted) setAiring(data?.results || []);
+      } catch (e) { console.error("on the air:", e); }
+      finally { if (mounted) setAiringLoading(false); }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
+
+  const handleSearchChange = (value) => setSearchTerm(value);
+  const handleSectionChange = (section) => setActiveSection(section);
 
   const currentYear = new Date().getFullYear();
 
@@ -131,60 +178,69 @@ function App() {
               opacity: 0.9,
             },
           },
-          "&.Mui-disabled": {
-            opacity: 0.3,
-          },
+          "&.Mui-disabled": { opacity: 0.3 },
         },
       },
     }),
     []
   );
 
-  // Combine movies and series for "all" view, or show separately
   const displayItems = useMemo(() => {
     if (activeSection === "all") {
-      const moviesList = (movies?.results || []).map(item => ({ ...item, type: 'movie' }));
-      const seriesList = (series?.results || []).map(item => ({ ...item, type: 'series' }));
+      const moviesList = (movies?.results || []).map((item) => ({ ...item, type: "movie" }));
+      const seriesList = (series?.results || []).map((item) => ({ ...item, type: "series" }));
       return [...moviesList, ...seriesList].sort((a, b) => {
-        // Sort by popularity score
         const aScore = (a.vote_average || 0) * (a.vote_count || 0);
         const bScore = (b.vote_average || 0) * (b.vote_count || 0);
         return bScore - aScore;
       });
     } else if (activeSection === "movies") {
-      return (movies?.results || []).map(item => ({ ...item, type: 'movie' }));
+      return (movies?.results || []).map((item) => ({ ...item, type: "movie" }));
     } else if (activeSection === "series") {
-      return (series?.results || []).map(item => ({ ...item, type: 'series' }));
+      return (series?.results || []).map((item) => ({ ...item, type: "series" }));
     }
     return [];
   }, [activeSection, movies, series]);
 
-  const currentPage = activeSection === "movies" ? pageMovies : activeSection === "series" ? pageSeries : pageMovies;
-  const totalPages = activeSection === "movies" 
-    ? (movies?.total_pages || 0)
-    : activeSection === "series"
-    ? (series?.total_pages || 0)
-    : Math.max(movies?.total_pages || 0, series?.total_pages || 0);
-  
-  const isLoading = activeSection === "movies" ? loadingMovies : activeSection === "series" ? loadingSeries : (loadingMovies || loadingSeries);
-  const hasError = activeSection === "movies" ? errorMovies : activeSection === "series" ? errorSeries : (errorMovies || errorSeries);
-  const totalResults = activeSection === "all"
-    ? ((movies?.total_results || 0) + (series?.total_results || 0))
-    : activeSection === "movies"
-    ? (movies?.total_results || 0)
-    : (series?.total_results || 0);
+  const currentPage =
+    activeSection === "movies" ? pageMovies :
+    activeSection === "series" ? pageSeries : pageMovies;
+
+  const totalPages =
+    activeSection === "movies" ? (movies?.total_pages || 0) :
+    activeSection === "series" ? (series?.total_pages || 0) :
+    Math.max(movies?.total_pages || 0, series?.total_pages || 0);
+
+  const isLoading =
+    activeSection === "movies" ? loadingMovies :
+    activeSection === "series" ? loadingSeries :
+    (loadingMovies || loadingSeries);
+
+  const hasError =
+    activeSection === "movies" ? errorMovies :
+    activeSection === "series" ? errorSeries :
+    (errorMovies || errorSeries);
+
+  const totalResults =
+    activeSection === "all" ? ((movies?.total_results || 0) + (series?.total_results || 0)) :
+    activeSection === "movies" ? (movies?.total_results || 0) :
+    (series?.total_results || 0);
 
   const handlePageChange = (event, value) => {
-    if (activeSection === "movies") {
-      setPageMovies(value);
-    } else if (activeSection === "series") {
-      setPageSeries(value);
+    if (activeSection === "movies") setPageMovies(value);
+    else if (activeSection === "series") setPageSeries(value);
+    else { setPageMovies(value); setPageSeries(value); }
+    const browse = document.getElementById("browse-section");
+    if (browse) {
+      const navHeight = document.querySelector(".navigation")?.offsetHeight || 0;
+      const top = browse.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+      window.scrollTo({ top, behavior: "smooth" });
     } else {
-      setPageMovies(value);
-      setPageSeries(value);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  const isSearching = !!debouncedSearchTerm;
 
   return (
     <Routes>
@@ -206,18 +262,61 @@ function App() {
             />
 
             <main className="main-content">
-              {/* Unified Content Section */}
-              <section className="content-section">
+              {/* Hero & curated rows hide while searching to surface results */}
+              {!isSearching && (
+                <>
+                  <HeroCarousel items={trending.slice(0, 6)} />
+
+                  <MediaRow
+                    title="Trending This Week"
+                    icon="🔥"
+                    items={trending.slice(0, 18)}
+                    mediaType="mixed"
+                    loading={trendingLoading}
+                  />
+
+                  <MediaRow
+                    title="Top Rated Movies"
+                    icon="🏆"
+                    items={topMovies.slice(0, 18)}
+                    mediaType="movie"
+                    loading={topMoviesLoading}
+                  />
+
+                  <MediaRow
+                    title="Top Rated Series"
+                    icon="📺"
+                    items={topSeries.slice(0, 18)}
+                    mediaType="tv"
+                    loading={topSeriesLoading}
+                  />
+
+                  <MediaRow
+                    title="Coming Soon"
+                    icon="🎬"
+                    items={upcoming.slice(0, 18)}
+                    mediaType="movie"
+                    loading={upcomingLoading}
+                  />
+
+                  <MediaRow
+                    title="On The Air"
+                    icon="📡"
+                    items={airing.slice(0, 18)}
+                    mediaType="tv"
+                    loading={airingLoading}
+                  />
+                </>
+              )}
+
+              {/* Browse / Search Grid */}
+              <section id="browse-section" className="content-section">
                 <div className="section-header">
-                  <Typography
-                    variant="h2"
-                    component="h1"
-                    className="section-title"
-                  >
-                    {debouncedSearchTerm ? (
+                  <Typography variant="h2" component="h1" className="section-title">
+                    {isSearching ? (
                       <>🔍 Search Results for "{debouncedSearchTerm}"</>
                     ) : activeSection === "all" ? (
-                      <>🎬 All Content</>
+                      <>🎞️ Browse Catalog</>
                     ) : activeSection === "movies" ? (
                       <>🎥 Movies</>
                     ) : (
@@ -226,9 +325,30 @@ function App() {
                   </Typography>
                   {!isLoading && totalResults > 0 && (
                     <Typography variant="body2" className="section-subtitle">
-                      {totalResults}{" "}
-                      {totalResults === 1 ? "result" : "results"} found
+                      {totalResults} {totalResults === 1 ? "result" : "results"} found
                     </Typography>
+                  )}
+
+                  {!isSearching && (
+                    <div className="section-tabs" role="tablist">
+                      {[
+                        { id: "all", label: "All", icon: "🎬" },
+                        { id: "movies", label: "Movies", icon: "🎥" },
+                        { id: "series", label: "Series", icon: "📺" },
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={activeSection === tab.id}
+                          className={`section-tab ${activeSection === tab.id ? "is-active" : ""}`}
+                          onClick={() => handleSectionChange(tab.id)}
+                        >
+                          <span aria-hidden="true">{tab.icon}</span>
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
 
@@ -253,32 +373,29 @@ function App() {
                 ) : (
                   <>
                     <div className="unified-content-grid">
-                      {displayItems.length > 0
-                        ? displayItems.map((item) =>
-                            item.type === "movie" ? (
-                              <Movie key={`movie-${item.id}`} {...item} />
-                            ) : (
-                              <Serie key={`series-${item.id}`} {...item} />
-                            )
+                      {displayItems.length > 0 ? (
+                        displayItems.map((item) =>
+                          item.type === "movie" ? (
+                            <Movie key={`movie-${item.id}`} {...item} />
+                          ) : (
+                            <Serie key={`series-${item.id}`} {...item} />
                           )
-                        : !hasError && (
-                            <div className="empty-state">
-                              <div
-                                style={{
-                                  fontSize: "4rem",
-                                  marginBottom: "1rem",
-                                }}
-                              >
-                                {activeSection === "all" ? "🎬" : activeSection === "movies" ? "🎥" : "📺"}
-                              </div>
-                              <Typography variant="h5">
-                                No {activeSection === "all" ? "content" : activeSection === "movies" ? "movies" : "series"} found
-                              </Typography>
-                              <Typography variant="body2">
-                                Try adjusting your search terms or browse popular content
-                              </Typography>
+                        )
+                      ) : (
+                        !hasError && (
+                          <div className="empty-state">
+                            <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>
+                              {activeSection === "all" ? "🎬" : activeSection === "movies" ? "🎥" : "📺"}
                             </div>
-                          )}
+                            <Typography variant="h5">
+                              No {activeSection === "all" ? "content" : activeSection === "movies" ? "movies" : "series"} found
+                            </Typography>
+                            <Typography variant="body2">
+                              Try adjusting your search terms or browse popular content
+                            </Typography>
+                          </div>
+                        )
+                      )}
                     </div>
 
                     {totalPages > 1 && (
@@ -304,10 +421,7 @@ function App() {
                 <Typography variant="body2" className="dd-footer">
                   All Rights Reserved, LB Movies {currentYear} ©
                 </Typography>
-                <Typography
-                  variant="body2"
-                  className="dd-footer dd-footer-secondary footer-link"
-                >
+                <Typography variant="body2" className="dd-footer dd-footer-secondary footer-link">
                   Designed &amp; Developed by{" "}
                   <a
                     target="_blank"

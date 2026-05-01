@@ -112,3 +112,49 @@ export const getSeriesDetails = async (seriesId, appendToResponse = "") => {
 
   return callTMDB(`tv/${seriesId}`, params);
 };
+
+/**
+ * Trending across movies & TV (used for the hero / trending row)
+ * mediaType: "all" | "movie" | "tv"
+ * timeWindow: "day" | "week"
+ */
+export const getTrending = async (mediaType = "all", timeWindow = "week", page = 1) => {
+  return callTMDB(`trending/${mediaType}/${timeWindow}`, {
+    page: page.toString(),
+  });
+};
+
+/**
+ * Top rated movies
+ */
+export const getTopRatedMovies = async (page = 1) => {
+  return callTMDB("movie/top_rated", { page: page.toString() });
+};
+
+/**
+ * Top rated TV series
+ */
+export const getTopRatedSeries = async (page = 1) => {
+  return callTMDB("tv/top_rated", { page: page.toString() });
+};
+
+/**
+ * Upcoming movies
+ */
+export const getUpcomingMovies = async (page = 1) => {
+  return callTMDB("movie/upcoming", { page: page.toString() });
+};
+
+/**
+ * Now playing in theaters
+ */
+export const getNowPlayingMovies = async (page = 1) => {
+  return callTMDB("movie/now_playing", { page: page.toString() });
+};
+
+/**
+ * Currently airing TV series
+ */
+export const getOnTheAirSeries = async (page = 1) => {
+  return callTMDB("tv/on_the_air", { page: page.toString() });
+};
