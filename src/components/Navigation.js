@@ -70,12 +70,9 @@ const Navigation = ({
     const onHome = window.location.pathname === "/";
 
     if (!onHome) {
-      navigate("/");
-      // give the home page a tick to mount
-      setTimeout(() => {
-        if (onSectionChange) onSectionChange(section);
-        setTimeout(scrollToBrowse, 60);
-      }, 80);
+      // App.js reads location.state on the "/" route and applies the section
+      // + scroll, so it works even though Profile/ActivityFeed unmount.
+      navigate("/", { state: { section, scrollToBrowse: true } });
       return;
     }
 

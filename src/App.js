@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Movie from "./components/Movie";
 import Serie from "./components/Serie";
 import Navigation from "./components/Navigation";
@@ -36,6 +36,9 @@ function useDebounce(value, delay) {
 }
 
 function App() {
+  const location = useLocation();
+  const consumedNavKeyRef = useRef(null);
+
   // Browse grid (search / discover) state — preserved from prior version
   const [movies, setMovies] = useState(null);
   const [series, setSeries] = useState(null);
@@ -151,6 +154,33 @@ function App() {
 
   const handleSearchChange = (value) => setSearchTerm(value);
   const handleSectionChange = (section) => setActiveSection(section);
+
+  // Consume cross-page navigation: another page can do
+  //   navigate("/", { state: { section: "movies", scrollToBrowse: true } })
+  // and we apply it once per navigation (location.key is unique per nav).
+  useEffect(() => {
+    if (location.pathname !== "/") return;
+    const navKey = location.key;
+    const incoming = location.state;
+    if (!incoming || consumedNavKeyRef.current === navKey) return;
+    consumedNavKeyRef.current = navKey;
+
+    if (incoming.section) {
+      setActiveSection(incoming.section);
+    }
+    if (incoming.scrollToBrowse) {
+      // Wait for the section change + content render before scrolling.
+      setTimeout(() => {
+        const el = document.getElementById("browse-section");
+        if (!el) return;
+        const navHeight =
+          document.querySelector(".navigation")?.offsetHeight || 0;
+        const top =
+          el.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+        window.scrollTo({ top, behavior: "smooth" });
+      }, 120);
+    }
+  }, [location]);
 
   const currentYear = new Date().getFullYear();
 
